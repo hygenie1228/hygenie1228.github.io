@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="TeHOR: Text-Guided 3D Human and Object Reconstruction with Textures">
+  <meta name="keywords" content="TeHOR">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TeHOR: Text-Guided 3D Human and Object Reconstruction with Textures</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+   <!-- 🟡 Open Graph (OG) -->
+  <meta property="og:title" content="TeHOR" />
+  <meta property="og:description" content="TeHOR: Text-Guided 3D Human and Object Reconstruction with Textures" />
+  <meta property="og:image" content="https://hygenie1228.github.io/TeHOR/static/images/thumbnail.png" /> 
+  <meta property="og:url" content="https://yourdomain.com/" /> 
+  <meta property="og:type" content="website" />
+
+  <!-- X site -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TeHOR" />
+  <meta name="twitter:description" content="TeHOR: Text-Guided 3D Human and Object Reconstruction with Textures" />
+  <meta name="twitter:image" content="https://hygenie1228.github.io/TeHOR/static/images/thumbnail.png" />
+
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/twentytwenty.css">
+  <link rel="icon" href="./static/images/favicon.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/jquery-3.2.1.min.js"></script>
+  <script src="./static/js/jquery.event.move.js"></script>
+  <script src="./static/js/jquery.twentytwenty.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body" style="padding-bottom: 10px;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            <img src="./static/images/favicon.png" class="inline-title-icon" alt="TeHOR Icon">
+            <span class="tehor-gradient">TeHOR</span>: Text-Guided 3D Human and Object Reconstruction with Textures
+          </h1>
+          <div class="is-size-4 publication-authors">
+            <span class="author-block">
+              <a href="https://hygenie1228.github.io">Hyeongjin Nam</a>,</span>
+            <span class="author-block">
+              <a href="https://dqj5182.github.io">Daniel Sungho Jung</a>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=xnOKRZ4AAAAJ">Kyoung Mu Lee</a>
+            </span>
+          </div>
+
+          <div class="is-size-4 publication-authors">
+            <span class="author-block">Seoul National University </br>
+            <sp/n class="author-block" style="margin-top: 10;"> <b>CVPR 2026</b></span> </br>
+            <img style="width:25%; padding-top: 10px;" src="./static/images/logo_cvlab.png">
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- Arxiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2602.19679"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="./static/TeHOR.pdf"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=jNtbY6Z3urY"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <!-- <span class="link-block">
+                <a href="#"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (To be released)</span>
+                  </a>
+              </span> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered">
+        <div class="column is-four-fifths" style="width:140%; margin-top:1.0rem">
+          <div class="columns is-centered">
+
+            <div class="column" style="padding: 5px;">
+              <div class="content">
+                <video id="video1" autoplay muted loop playsinline width="100%">
+                  <source src="./static/videos/teaser_1.mp4" type="video/mp4">
+                </video>
+              </div>
+            </div>
+
+            <div class="column" style="padding: 5px;">
+              <div class="content">
+                <video id="video2" autoplay muted loop playsinline width="100%">
+                  <source src="./static/videos/teaser_2.mp4" type="video/mp4">
+                </video>
+              </div>
+            </div>
+
+            <div class="column" style="padding: 5px;">
+              <div class="content">
+                <video id="video3" autoplay muted loop playsinline width="100%">
+                  <source src="./static/videos/teaser_3.mp4" type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <h2 class="subtitle" style="width:80%; margin-top:0.5rem; margin-bottom:3rem; font-size: 1.1rem;">
+            <b>TL;DR.</b> Given a single image, our framework jointly reconstructs textured 3D human and object by capturing holistic and semantic interactions from <b>text descriptions</b>.
+        </h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Joint reconstruction of 3D human and object from a single image is an active research area, with pivotal applications in robotics and digital content creation.
+            Despite recent advances, existing approaches suffer from two fundamental limitations.
+            First, their reconstructions rely heavily on physical contact information, which inherently cannot capture non-contact human–object interactions, such as gazing at or pointing toward an object.
+            Second, the reconstruction process is primarily driven by local geometric proximity, neglecting the human and object appearances that provide global context crucial for understanding holistic interactions.
+          </p>
+          <p>
+            To address these issues, we introduce <b>TeHOR</b>, a framework built upon two core designs.
+            First, beyond contact information, our framework leverages text descriptions of human–object interactions to enforce semantic alignment between the 3D reconstruction and its textual cues, enabling reasoning over a wider spectrum of interactions, including non-contact cases.
+            Second, we incorporate appearance cues of the 3D human and object into the alignment process to capture holistic contextual information, thereby ensuring visually plausible reconstructions.
+            As a result, our framework produces accurate and semantically coherent reconstructions, achieving state-of-the-art performance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <!-- Intro video -->
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered" style="padding-top: 0px;">
+      <div class="publication-video" style="width: 80%; display: inline-block;">
+        <iframe src="https://www.youtube.com/embed/jNtbY6Z3urY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+  </div>
+  <!-- Intro video -->
+
+  <div class="container is-max-desktop">
+    <!-- Introducing TeHOR -->
+    <div class="column has-text-centered" style="padding-top: 0px; padding-bottom: 3.0rem;">
+      <h2 class="title is-4">Text-guided optimization</h2>
+      <div class="content has-text-justified">
+          <img src="./static/images/pipeline.jpg", alt="Algorithm description of TeHOR", width="100%"> </img>
+      </div>
+      <div class="content has-text-justified">
+          <b>TeHOR</b> initially reconstructs a 3D human, a 3D object, and a 2D background.
+          Then, the initially reconstructed 3D human and object are jointly optimized using two texts: holsitic prompt and contact prompt.
+          By using text description, our framework ensures accurate and semantically plausible human-object interaction in the reconstruction.
+      </div>
+    </div>
+    <!-- Introducing TeHOR -->
+
+    <!-- Qualitative results-->
+    <div class="column has-text-centered" style="padding-bottom: 3.0rem;">
+      <h2 class="title is-4">Qualitative results</h2>
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_1.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_1a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_1a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_1b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_1b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+        
+        <div class="column is-3">
+          <img src="./static/images/sample_2.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_2a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_2a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_2b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_2b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_3.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_3a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_3a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_3b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_3b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+        
+        <div class="column is-3">
+          <img src="./static/images/sample_4.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_4a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_4a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_4b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_4b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_5.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_5a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_5a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_5b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_5b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+        
+        <div class="column is-3">
+          <img src="./static/images/sample_6.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_6a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_6a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_6b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_6b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #DE8344; font-weight: bold;">TeHOR (Ours)</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- Qualitative results-->
+
+    <script>
+      $(function(){
+          $(".twentytwenty-container").twentytwenty({
+              no_overlay: true,
+              default_offset_pct: 0.5,
+              click_to_move: false
+          });
+      });
+    </script>
+
+    <!-- Comparison with SOTA methods -->
+    <div class="column has-text-centered">
+      <h2 class="title is-4">Comparison with SOTA methods</h2>
+      <div id="results-carousel-1" class="carousel-1 results-carousel">
+        <div class="item item-gen1">
+          <video poster="" id="comp-1" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/comparison_1.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-gen2">
+          <video poster="" id="comp-2" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/comparison_2.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-gen3">
+          <video poster="" id="comp-3" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/comparison_3.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div id="results-carousel-2" class="carousel-1 results-carousel">
+        <div class="item item-gen4">
+          <video poster="" id="comp-4" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/comparison_4.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-gen5">
+          <video poster="" id="comp-5" autoplay muted loop playsinline height="100%">
+            <source src="./static/videos/comparison_5.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="content has-text-justified" style="padding-top:15px;">
+      </div>
+    </div>
+    <!-- Comparison with SOTA methods -->
+     
+
+
+  </div>
+</section>
+
+<section class="section" id="BibTeX" style="padding-top:0px;">
+  <div class="container is-max-desktop content">
+    <h4 class="title">BibTeX</h4>
+    <pre><code>@article{nam2026tehor,
+      author    = {Nam, Hyeongjin and Jung, Daniel Sungho and and Lee, Kyoung Mu},
+      title     = {{TeHOR}: Text-Guided 3D Human and Object Reconstruction with Textures},
+      journal   = {CVPR},
+      year      = {2026},
+    }</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            The code for this webpage is largely borrowed from the <a
+            href="https://github.com/nerfies/nerfies.github.io">source code</a>  of this website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

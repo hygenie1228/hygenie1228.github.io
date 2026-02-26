@@ -1,0 +1,331 @@
+  <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="DeClotH: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image">
+  <meta name="keywords" content="DeClotH">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DeClotH: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+   <!-- 🟡 Open Graph (OG) -->
+  <meta property="og:title" content="DeClotH" />
+  <meta property="og:description" content="DeClotH: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image" />
+  <meta property="og:image" content="https://hygenie1228.github.io/DeClotH/static/images/DeClotH_thumbnail.png" /> 
+  <meta property="og:url" content="https://yourdomain.com/" /> 
+  <meta property="og:type" content="website" />
+
+  <!-- X site -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DeClotH" />
+  <meta name="twitter:description" content="DeClotH: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image" />
+  <meta name="twitter:image" content="https://hygenie1228.github.io/DeClotH/static/images/DeClotH_thumbnail.png" />
+
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">DeClotH: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://hygenie1228.github.io">Hyeongjin Nam<sup>1,2</sup></a>,</span>
+            <span class="author-block">
+              <a href="kimdonghwan06.github.io">Donghwan Kim<sup>1</sup></a>,</span>
+            <span class="author-block">
+              <a href="https://taekkii.github.io">Jeongtaek Oh<sup>1</sup></a>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=xnOKRZ4AAAAJ">Kyoung Mu Lee<sup>1</sup></a>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Seoul National University, <sup>2</sup>KRAFTON</span> </br>
+            <span class="author-block"> <b>CVPR 2025</b></span> </br>
+            <img style="width:20%; padding-top: 16px;" src="./static/images/logo_cvlab.png"> <img style="width: 17%; padding-top: 16px; margin-left: 15px; margin-bottom: 8px;" src="./static/images/logo_krafton.png">
+          </div>
+
+          
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- Arxiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2503.19373"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="./static/DeClotH_CVPR2025.pdf"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://youtu.be/E9MfFQG9e9s"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <video id="teaser"
+            autoplay
+            preload
+            muted
+            loop
+            playsinline
+            width="100%">
+        <source src="./static/videos/teaser.mp4" type="video/mp4">
+      </video>
+      <h2 class="subtitle">
+        Given a single image, <b>DeClotH</b> reconstructs 3D cloth and human body based on 3D template models.
+        The reconstructed 3D clothes are decomposable from the human body, allowing cloth transfer to a new human avatar.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            We propose <b>DeClotH</b>, which reconstructs both 3D cloth and human body from a single image.
+          </p>
+          <p>
+            Unlike recent 3D human reconstruction methods that consider cloth and human body as one unified object, we aim to reconstruct 3D cloth and human body, while being able to separate them.
+            This is a much more challenging problem because cloth and human body are heavily occluded by each other, making it difficult to infer their overall geometry and texture.
+            To address the occlusion issue, there are two core designs in our framework.
+            First, to alleviate the occlusion issue, we leverage 3D template models of both cloth and human body as regularizations, which provide strong priors and prevent erroneous reconstruction by the occlusion.
+            Second, we introduce a cloth diffusion model specifically designed to provide contextual information about cloth appearance, thereby enhancing the reconstruction of 3D cloth.
+            Qualitative and quantitative experiments demonstrate that our proposed approach is highly effective in reconstructing both 3D cloth and the human body.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <!-- Intro video -->
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered" style="padding-top: 0px; padding-bottom: 0px;">
+      <div class="publication-video" style="width: 80%; display: inline-block;">
+        <iframe src="https://www.youtube.com/embed/E9MfFQG9e9s" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+  </div>
+  <!-- Intro video -->
+
+  <div class="container is-max-desktop">
+    <!-- Method -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths", style="width: 100%; margin-top:40px">
+        <h2 class="title is-4">Introducing DeClotH</h2>
+        <div class="content has-text-justified">
+          <img src="./static/images/method.jpg", alt="Algorithm description of DeClotH", width="100%"> </img>
+        </div>
+        <div class="content has-text-justified">
+          Given an input image, <b>DeClotH</b> optimizes 3D cloth and human body, represented by DMTets. 
+          For the optimization, we extract normal map, silhouette, and 3D template meshes. 
+          Subsequently, the 3D cloth and human body are optimized by three core loss functions: template regularization loss, cloth SDS loss, and human SDS loss.
+        </div>
+      </div>
+    </div>
+    <!-- Method -->
+  </div>
+</section>
+
+<section class="hero teaser">
+  <!-- Reconstruction examples -->
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered" style="padding-bottom: 0px;">
+      <h2 class="title is-4">Reconstruction examples</h2>
+      <div class="publication-video" style="padding-bottom: 51.5%;">
+        <video id="clothdiffusion" autoplay preload muted loop playsinline width="100%">
+          <source src="./static/videos/examples.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="content has-text-justified">
+          Our framework produces much accurate 3D human body and cloth reconstruction from a in-the-wild images.
+          Our proposed template-based optimization pipeline effectively infer geometry and texture in the invisible regions of 3D cloth and human body.
+      </div>
+  </div>
+  <!-- Reconstruction examples -->
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- 3D cloth transfer -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">3D cloth transfer</h2>
+        <div class="publication-video" style="padding-bottom: 48%;">
+          <video id="clothdiffusion" autoplay preload muted loop playsinline width="100%">
+            <source src="./static/videos/cloth_transfer.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="content has-text-justified">
+          We can transfer the reconstructed 3D clothes into a new 3D avatar, by fitting 3D clothes based on the SMPL(+H) human model.
+        </div>
+      </div>
+    </div>
+    <!-- 3D cloth transfer -->
+
+    <!-- Pose Deformation -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Pose deformation</h2>
+        <div class="publication-video" style="padding-bottom: 250px;">
+          <video id="clothdiffusion" autoplay preload muted loop playsinline width="100%">
+            <source src="./static/videos/pose_deformation.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="content has-text-justified">
+          We can deform the reconstructed 3D clothes and human body to a new pose sequence.
+        </div>
+      </div>
+    </div>
+    <!-- Pose Deformation -->
+
+    <!-- ClothDiffusion -->
+    <div class="columns is-centered has-text-centered" style="margin-top: 20px;">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Cloth image generation (ClothDiffusion) </h2>
+        <div class="publication-video">
+          <video id="clothdiffusion" autoplay preload muted loop playsinline width="85%">
+            <source src="./static/videos/clothdiffusion.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="content has-text-justified">
+          The proposed ClothDiffusion is specifically trained to generate only cloth images, 
+          ClothDiffusion is highly beneficial for reconstructing 3D cloth, by providing prior image knowledge specialized for cloth geometry and texture.
+          Additionally, ClothDiffusion can be controlled by incorporating 3D template models as regional information for guidance.
+        </div>
+      </div>
+    </div>
+    <!-- ClothDiffusion -->
+
+    <!-- Related links -->
+    <div class="columns is-centered" style="margin-top: 50px;">
+      <div class="column is-full-width">
+        <h2 class="title is-4">Related links</h2>
+        <div class="content has-text-justified">
+          <p><a href="https://github.com/hygenie1228/ClothWild_RELEASE">ClothWild: 3D Clothed Human Reconstruction in the Wild</a></p>
+          <p><a href="https://github.com/yfeng95/PIXIE">PIXIE: Collaborative Regression of Expressive Bodies</a></p>
+          <p><a href="https://github.com/huangyangyi/TeCH">TeCH: Text-guided Reconstruction of Lifelike Clothed Humans</a></p>
+          <p><a href="https://github.com/snuvclab/GALA">GALA: Generating Animatable Layered Assets from a Single Scan</a></p>
+        </div>
+      </div>
+    </div>
+    <!-- Related links -->
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h4 class="title">BibTeX</h4>
+    <pre><code>@article{nam2025decloth,
+      author    = {Nam, Hyeongjin and Kim, Donghwan and Oh, Jeongtaek and Lee, Kyoung Mu},
+      title     = {{DeClotH}: Decomposable 3D Cloth and Human Body Reconstruction from a Single Image},
+      journal   = {CVPR},
+      year      = {2025},
+    }</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            The code for this webpage is largely borrowed from the <a
+            href="https://github.com/nerfies/nerfies.github.io">source code</a>  of this website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="PARTE: Part-Guided Texturing for 3D Human Reconstruction from a Single Image">
+  <meta name="keywords" content="PARTE">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PARTE: Part-Guided Texturing for 3D Human Reconstruction from a Single Image</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+   <!-- 🟡 Open Graph (OG) -->
+  <meta property="og:title" content="PARTE" />
+  <meta property="og:description" content="PARTE: Part-Guided Texturing for 3D Human Reconstruction from a Single Image" />
+  <meta property="og:image" content="https://hygenie1228.github.io/PARTE/static/images/thumbnail.png" /> 
+  <meta property="og:url" content="https://yourdomain.com/" /> 
+  <meta property="og:type" content="website" />
+
+  <!-- X site -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PARTE" />
+  <meta name="twitter:description" content="PARTE: Part-Guided Texturing for 3D Human Reconstruction from a Single Image" />
+  <meta name="twitter:image" content="https://hygenie1228.github.io/PARTE/static/images/thumbnail.png" />
+
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script> -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.png">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body" style="padding-bottom: 10px;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title"><span class="parte-gradient">PARTE</span>: Part-Guided Texturing for 3D Human Reconstruction from a Single Image</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://hygenie1228.github.io">Hyeongjin Nam<sup>*1</sup></a>,</span>
+            <span class="author-block">
+              <a href="kimdonghwan06.github.io">Donghwan Kim<sup>*1</sup></a>,</span>
+            <span class="author-block">
+              <a href="https://www.vcai.korea.ac.kr/members/principal-investigator">Gyeongsik Moon<sup>&dagger;2</sup></a>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=xnOKRZ4AAAAJ">Kyoung Mu Lee<sup>1</sup></a>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Seoul National University, <sup>2</sup>Korea University</span> </br>
+            <span class="author-block"> <sup>*</sup>Equal contribution, <sup>&dagger;</sup>Corresponding author</span> </br>
+            <span class="author-block" style="margin-top: 10;"> <b>ICCV 2025</b></span> </br>
+            <img style="width:22%; padding-top: 16px;" src="./static/images/logo_cvlab.png"> <img style="width: 18.5%; padding-top: 16px; margin-bottom: 2px;" src="./static/images/logo_ku.png">
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- Arxiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2507.17332"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="./static/PARTE_ICCV2025.pdf"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link. -->
+              <span class="link-block">
+                <a href="https://www.youtube.com/watch?v=gVm7fn6gns0"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/KimDonghwan06/PARTE_RELEASE"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small" style="background-color: #fff;">
+  <div class="hero-body has-text-centered" style="display: flex; justify-content: center; flex-wrap: wrap; padding-top: 0px; padding-bottom: 0px;">
+    <video id="teaser" autoplay preload muted loop playsinlinewidth="100%" style="max-width: 100%;">
+      <source src="./static/videos/teaser.mp4" type="video/mp4">
+    </video>
+    <!-- <div class="content has-text-justified" style="max-width: 55%; padding-top:5px">
+      Given a single image, <b>PARTE</b> reconstructs 3D textured human by effectively utilizing <b>3D human part information</b>.
+    </div> -->
+  </div>
+
+</section>
+
+
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            The misaligned human texture across different human parts is one of the main limitations of existing 3D human reconstruction methods.
+            Each human part, such as a jacket or pants, should maintain a distinct texture without blending into others.
+            The structural coherence of human parts serves as a crucial cue to infer human textures in the invisible regions of a single image.
+            However, most existing 3D human reconstruction methods do not explicitly exploit such part segmentation priors, leading to misaligned textures in their reconstructions.
+          </p>
+          <p>
+            In this regard, we present <b>PARTE</b>, which utilizes 3D human part information as a key guide to reconstruct 3D human textures.
+            First, to infer 3D human part information from a single image, we propose a 3D part segmentation module (PartSegmenter) that initially reconstructs a textureless human surface and predicts human part labels based on the textureless surface. 
+            Second, to incorporate part information into texture reconstruction, we introduce a part-guided texturing module (PartTexturer), which acquires prior knowledge from a pre-trained image generation network on texture alignment of human parts.
+            Extensive experiments demonstrate that our framework achieves state-of-the-art quality in 3D human reconstruction.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <!-- Intro video -->
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered" style="padding-top: 0px;">
+      <div class="publication-video" style="width: 80%; display: inline-block;">
+        <iframe src="https://www.youtube.com/embed/gVm7fn6gns0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+  </div>
+  <!-- Intro video -->
+
+  <div class="container is-max-desktop">
+    <!-- Introducing PARTE -->
+    <div class="hero-body has-text-centered" style="padding-top: 0px;">
+      <h2 class="title is-4">Introducing PARTE</h2>
+      <div class="content has-text-justified">
+          <img src="./static/images/overall_pipline.jpg", alt="Algorithm description of PARTE", width="100%"> </img>
+      </div>
+      <div class="content has-text-justified">
+          <b>PARTE</b> initially reconstructs textureless human mesh from a single image and textures it based on two core modules.
+          <b style="color: rgb(70, 110, 255);">PartSegmenter</b> predicts 3D human parts of the textureless human mesh by incorporating information from the input image and normal maps of the textureless human surface.
+          Based on the 3D human part segmentations, <b style="color: rgb(50,190,50);">PartTexturer</b> reconstructs the human textures using PartDiffusion network that infers plausible human appearance corresponding to the human parts.
+      </div>
+    </div>
+    <!-- Introducing PARTE -->
+
+    <!-- Details of PartSegmenter & PartTexturer -->
+    <div class="hero-body has-text-centered" style="display: flex; justify-content: center; flex-wrap: wrap;">
+      <div style="width: 50%; padding: 1rem;">
+        <h2 class="title is-5"><b style="color: rgb(70, 110, 255);">PartSegmenter</b></h2>
+        <div class="content has-text-justified">
+            <img src="./static/images/PartSegmenter.jpg", alt="Algorithm description of PARTE" width="100%" style="height:390px;"> </img>
+        </div>
+        <div class="content has-text-justified">
+          <b style="color: rgb(70, 110, 255);">PartSegmenter</b> performs normal rendering and acquires the part segments from a textureless human surface. 
+          The part segments are used for voting 3D human part labels on the human surface.
+        </div>
+      </div>
+      <div style="width: 50%; padding: 1rem;">
+        <h2 class="title is-5"><b style="color: rgb(50, 190, 50);">PartTexturer</b></h2>
+        <div class="content has-text-justified">
+            <img src="./static/images/PartTexturer.jpg", alt="Algorithm description of PARTE" width="100%" style="height:385px;"> </img>
+        </div>
+        <div class="content has-text-justified">
+          <b style="color: rgb(50, 190, 50);">PartTexturer</b> integrates three key sources of information: the front-view image, textprompts, and part segments of the rendering view, to infer the texture for invisible regions.
+        </div>
+      </div>
+    </div>
+    <!-- Details of PartSegmenter & PartTexturer -->
+
+    <!-- PartSegmenter -->
+    <div class="columns is-centered has-text-centered" style="padding-bottom: 3rem;">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">3D segmentation results of <b style="color: rgb(70, 110, 255);">PartSegmenter</b></h2>
+        <div id="results-carousel" class="carousel-2 results-carousel">
+          <div class="item item-steve">
+          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/partsegmenter_a1.mp4" type="video/mp4">
+          </video>
+          </div>
+          <div class="item item-chair-tp">
+            <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/partsegmenter_a2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-shiba">
+            <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/partsegmenter_a3.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div id="results-carousel" class="carousel-2 results-carousel">
+          <div class="item item-steve">
+            <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/partsegmenter_b1.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-chair-tp">
+            <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/partsegmenter_b2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-shiba">
+            <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/partsegmenter_b3.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div class="content has-text-justified" style="padding-top:15px;">
+          Our proposed PartSegmenter accurately performs 3D part segmentation even when given only a front-view image under noisy geometry.
+        </div>
+      </div>
+    </div>
+    <!-- PartSegmenter -->
+
+    
+    <!-- PartDiffusion of PartTexturer -->
+    <div class="columns is-centered has-text-centered" style="padding-bottom: 3rem;">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Image generation results of PartDiffusion (<b style="color: rgb(50, 190, 50);">PartTexturer</b>)</h2>
+        <div id="results-carousel" class="carousel-1 results-carousel">
+          <div class="item item-gen1">
+            <img src="./static/images/partdiffusion_1.jpg"> 
+          </div>
+          <div class="item item-gen2">
+            <img src="./static/images/partdiffusion_2.jpg"> 
+          </div>
+          <div class="item item-gen3">
+            <img src="./static/images/partdiffusion_3.jpg"> 
+          </div>
+          <div class="item item-gen4">
+            <img src="./static/images/partdiffusion_4.jpg"> 
+          </div>
+          <div class="item item-gen5">
+            <img src="./static/images/partdiffusion_5.jpg"> 
+          </div>
+          <div class="item item-gen6">
+            <img src="./static/images/partdiffusion_6.jpg"> 
+          </div>
+        </div>
+        <div class="content has-text-justified" style="padding-top:15px;">
+          Our proposed PartDiffusion, a core component of PartTexturer, generates human images from novel views while preserving the input appearance.
+        </div>
+      </div>
+    </div>
+    <!-- PartDiffusion of PartTexturer -->
+
+    <!-- Qualitative results -->
+    <div class="columns is-centered has-text-centered" style="padding-bottom: 3rem;">
+      <div class="column is-four-fifths">
+        <h2 class="title is-4">Qualitative results</h2>
+        <div id="results-carousel" class="carousel-2 results-carousel">
+          <div class="item item-steve">
+            <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a1.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-chair-tp">
+            <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-shiba">
+            <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a3.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody">
+            <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a4.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody2">
+            <video poster="" id="fullbody2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a5.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody2">
+            <video poster="" id="fullbody2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_a6.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+        <div id="results-carousel" class="carousel-2 results-carousel">
+          <div class="item item-steve">
+            <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b1.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-chair-tp">
+            <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b2.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-shiba">
+            <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b3.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody">
+            <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b4.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody2">
+            <video poster="" id="fullbody2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b5.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="item item-fullbody2">
+            <video poster="" id="fullbody2" autoplay controls muted loop playsinline height="100%">
+              <source src="./static/videos/example_b6.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Qualitative results -->
+
+  </div>
+</section>
+
+
+  
+
+
+
+
+<section class="section" id="BibTeX" style="padding-top:0px;">
+  <div class="container is-max-desktop content">
+    <h4 class="title">BibTeX</h4>
+    <pre><code>@article{nam2025parte,
+      author    = {Nam, Hyeongjin and Kim, Donghwan and Moon, Gyeongsik and Lee, Kyoung Mu},
+      title     = {{PARTE}: Part-Guided Texturing for 3D Human Reconstruction from a Single Image},
+      journal   = {ICCV},
+      year      = {2025},
+    }</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            The code for this webpage is largely borrowed from the <a
+            href="https://github.com/nerfies/nerfies.github.io">source code</a>  of this website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
