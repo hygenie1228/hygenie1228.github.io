@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HORIA visualization</title>
+  <style>
+    :root { --pipeline-grid: #26314a; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
+    #stage { position: fixed; inset: 0; cursor: grab; touch-action: none; user-select: none; }
+    #stage:active { cursor: grabbing; }
+    canvas { display: block; width: 100%; height: 100%; }
+    #status { position: fixed; left: 50%; bottom: 74px; transform: translateX(-50%); color: #b8beca; font: 13px system-ui,sans-serif; pointer-events: none; text-shadow: 0 2px 12px #000; }
+    #capture { position: fixed; right: 20px; bottom: 20px; z-index: 2; display: flex; align-items: center; gap: 7px; padding: 8px 14px; border: 1px solid #ffffff1f; border-radius: 999px; background: #12151cc9; backdrop-filter: blur(12px); color: #dfe3ea; font: 600 12px system-ui,sans-serif; cursor: pointer; }
+    #capture:hover { background: #1b1f28e6; }
+    #capture:disabled { opacity: 0.45; cursor: not-allowed; }
+    #capture svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+    #transport { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 2; display: flex; align-items: center; gap: 12px; width: min(620px, calc(100% - 40px)); padding: 9px 14px; border: 1px solid #ffffff1f; border-radius: 999px; background: #12151cc9; backdrop-filter: blur(12px); }
+    #scrub { flex: 1; height: 4px; accent-color: #7aa2ff; cursor: pointer; }
+    #elapsed { color: #aeb6c4; font: 11px system-ui,sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    #controls { position: fixed; right: 20px; top: 18px; z-index: 2; display: grid; gap: 8px; justify-items: end; }
+    /* Segmented pills rather than a stack of radio dots: the selected segment
+       is the filled one, so the state reads at a glance from across the room. */
+    .seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid #ffffff1a; border-radius: 999px; background: #0f1218bf; backdrop-filter: blur(14px); box-shadow: 0 8px 28px #00000059; }
+    .seg[hidden] { display: none; }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg span { display: block; padding: 6px 15px; border-radius: 999px; color: #99a2b1; font: 600 12px/1.15 system-ui,sans-serif; letter-spacing: 0.01em; white-space: nowrap; cursor: pointer; transition: color 0.14s ease, background 0.14s ease; }
+    .seg span:hover { color: #e6eaf1; }
+    .seg input:checked + span { background: #f3f5f9; color: #13161c; box-shadow: 0 1px 3px #00000073; }
+    .seg input:disabled + span { color: #474d58; cursor: not-allowed; }
+    .seg input:disabled:checked + span { background: #3a4049; color: #aeb6c4; }
+    /* The clip the reconstruction came from, at a readable size instead of only
+       on the camera prop out in the scene. Both are the same video element. */
+    /* Drag the bottom-right corner to resize; the box keeps the clip's shape
+       until it is dragged, then whatever shape it is dragged to. */
+    #clip-box { position: fixed; left: 20px; top: 18px; z-index: 2; width: 306px; overflow: hidden; resize: both; border: 1px solid #ffffff1f; border-radius: 12px; background: #0b0d12; box-shadow: 0 8px 28px #00000059; }
+    #clip { display: block; width: 100%; height: 100%; object-fit: contain; }
+    #toggle { flex: none; min-width: 52px; padding: 4px 10px; border: 1px solid #ffffff2e; border-radius: 999px; background: #ffffff12; color: #f2f4f8; font: 600 11px system-ui,sans-serif; cursor: pointer; }
+    #toggle:hover { background: #ffffff24; }
+  </style>
+
+  <style>
+    /* Sweep only: the fixed-azimuth clips View mode drags through are not
+       shipped, so the switch would offer a mode with nothing behind it. */
+    #turn-row { display: none !important; }
+    /* Only the `both` clips are shipped; unchecking either asks for a pass
+       that was not copied. */
+    #entity-row { display: none !important; }
+    /* No server to render the PNGs, and no transport bar in an embed. */
+    #capture, #transport { display: none !important; }
+
+    /* The chrome is sized for a full window; in an iframe partway down a page
+       it swamps the scene. Same controls, smaller, pulled into the corners. */
+    #clip-box { width: 168px !important; left: 12px !important; top: 12px !important;
+                border-radius: 8px !important;
+                /* No drag handle on the overlay in an embed. */
+                resize: none !important; }
+    #controls { right: 12px !important; top: 12px !important; gap: 6px !important; }
+    .seg { padding: 2px !important; }
+    .seg span { padding: 4px 11px !important; font-size: 11px !important; }
+    #status { font-size: 11px !important; bottom: 12px !important; }
+
+    /* The sample picker, bottom right, clear of the clip overlay. */
+    #samples { position: fixed; right: 12px; bottom: 12px; z-index: 3;
+               display: flex; gap: 6px; align-items: flex-end; }
+    #samples button { padding: 0; border: 1px solid #ffffff26; border-radius: 8px;
+                      background: #0b0e13; cursor: pointer; overflow: hidden;
+                      line-height: 0; opacity: .82;
+                      transition: opacity .15s, border-color .15s;
+                      -webkit-appearance: none; appearance: none; }
+    #samples button:hover { opacity: .95; }
+    #samples button[aria-current="true"] { opacity: 1; border-color: #f3f5f9; }
+    /* Already the right shape and already padded where it had to be, so the
+       image is placed as it is rather than cropped again by the browser. */
+    #samples img { display: block; width: 66px; height: 88px; }
+    @media (max-width: 700px) {
+      #samples img { width: 48px; height: 64px; }
+      #clip-box { width: 120px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="stage"><canvas class="pipeline__canvas" data-engine="three.js r185"></canvas></div>
+  <div id="clip-box"><video id="clip" muted loop playsinline></video></div>
+  <div id="controls">
+    <div class="seg" id="turn-row">
+      <label><input type="radio" name="turn" value="sweep" checked><span>Sweep</span></label>
+      <label><input type="radio" name="turn" value="view"><span>View</span></label>
+    </div>
+    <div class="seg" id="mode-row">
+      <label><input type="radio" name="mode" value="gs" checked><span>Gaussian</span></label>
+      <label><input type="radio" name="mode" value="mesh"><span>Mesh</span></label>
+    </div>
+    <div class="seg" id="entity-row">
+      <label><input type="checkbox" id="human" checked><span>Human</span></label>
+      <label><input type="checkbox" id="object" checked><span>Object</span></label>
+    </div>
+  </div>
+  <div id="transport">
+    <button id="toggle" type="button">Pause</button>
+    <input id="scrub" type="range" min="0" max="1" step="0.001" value="0">
+    <span id="elapsed">0.00 / 0.00</span>
+  </div>
+  <button id="capture" type="button" title="Save the current frame as transparent PNGs">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5h3.2l1.4-2.2h7.8l1.4 2.2H21v10H3z"/><circle cx="12" cy="13" r="3.6"/></svg>
+    <span id="capture-label">Capture</span>
+  </button>
+  <div id="status">Loading 4D scene…</div>
+  <script type="module">
+    import {
+      AdditiveBlending,
+      BackSide,
+      BufferAttribute,
+      BufferGeometry,
+      CircleGeometry,
+      Color,
+      CylinderGeometry,
+      DoubleSide,
+      Fog,
+      Group,
+      LineBasicMaterial,
+      LineSegments,
+      Mesh,
+      MeshBasicMaterial,
+      PerspectiveCamera,
+      PlaneGeometry,
+      Scene,
+      ShaderMaterial,
+      SRGBColorSpace,
+      Vector3,
+      VideoTexture,
+      WebGLRenderer,
+    } from "./assets/js/vendor/three.module.js";
+    import {createAtlas} from "./assets/js/pipeline/atlas.js";
+    import {createFlight} from "./assets/js/pipeline/flight.js";
+    import {createGround} from "./assets/js/pipeline/ground.js";
+    import {createOrbitOffset} from "./assets/js/pipeline/orbit.js";
+
+    const CONFIG = (function () {
+      const SAMPLES = {"basketball": {"frameCount": 190, "fps": 29.99210734017364, "renderSize": 1024, "renderHeight": 1002, "focalX": 886.7969316123189, "focalY": 887.0278683132595, "assets": [{"mode": "gs", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/basketball/orbit_gs_both_elev+10.mp4", "poster": "assets/media/basketball/orbit_gs_both_elev+10.jpg"}, {"mode": "gs", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/basketball/orbit_gs_both_elev+15.mp4", "poster": "assets/media/basketball/orbit_gs_both_elev+15.jpg"}, {"mode": "gs", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/basketball/orbit_gs_both_elev+20.mp4", "poster": "assets/media/basketball/orbit_gs_both_elev+20.jpg"}, {"mode": "gs", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/basketball/orbit_gs_both_elev+25.mp4", "poster": "assets/media/basketball/orbit_gs_both_elev+25.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/basketball/orbit_mesh_both_elev+10.mp4", "poster": "assets/media/basketball/orbit_mesh_both_elev+10.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/basketball/orbit_mesh_both_elev+15.mp4", "poster": "assets/media/basketball/orbit_mesh_both_elev+15.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/basketball/orbit_mesh_both_elev+20.mp4", "poster": "assets/media/basketball/orbit_mesh_both_elev+20.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/basketball/orbit_mesh_both_elev+25.mp4", "poster": "assets/media/basketball/orbit_mesh_both_elev+25.jpg"}], "frameScale": 1.0, "azimuthMin": -75.0, "azimuthMax": 75.0, "azimuthSweep": "pingpong", "sweepSign": -1.0, "azimuthCycles": 1, "cameraDistance": 1.85, "subjectBottom": 0.6402195608782435, "elevationMin": 10, "elevationMax": 25, "source": {"video": "assets/media/basketball/source.mp4", "aspect": 1.0222222222222221}}, "badminton_racket": {"frameCount": 408, "fps": 29.93, "renderSize": 1024, "renderHeight": 1820, "focalX": 2088.6822916666665, "focalY": 2088.1723594665527, "assets": [{"mode": "gs", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/badminton_racket/orbit_gs_both_elev+10.mp4", "poster": "assets/media/badminton_racket/orbit_gs_both_elev+10.jpg"}, {"mode": "gs", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/badminton_racket/orbit_gs_both_elev+15.mp4", "poster": "assets/media/badminton_racket/orbit_gs_both_elev+15.jpg"}, {"mode": "gs", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/badminton_racket/orbit_gs_both_elev+20.mp4", "poster": "assets/media/badminton_racket/orbit_gs_both_elev+20.jpg"}, {"mode": "gs", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/badminton_racket/orbit_gs_both_elev+25.mp4", "poster": "assets/media/badminton_racket/orbit_gs_both_elev+25.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/badminton_racket/orbit_mesh_both_elev+10.mp4", "poster": "assets/media/badminton_racket/orbit_mesh_both_elev+10.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/badminton_racket/orbit_mesh_both_elev+15.mp4", "poster": "assets/media/badminton_racket/orbit_mesh_both_elev+15.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/badminton_racket/orbit_mesh_both_elev+20.mp4", "poster": "assets/media/badminton_racket/orbit_mesh_both_elev+20.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/badminton_racket/orbit_mesh_both_elev+25.mp4", "poster": "assets/media/badminton_racket/orbit_mesh_both_elev+25.jpg"}], "frameScale": 1.0, "azimuthMin": -75.0, "azimuthMax": 75.0, "azimuthSweep": "pingpong", "sweepSign": -1.0, "azimuthCycles": 2, "cameraDistance": 1.85, "subjectBottom": 0.7398626373626374, "elevationMin": 10, "elevationMax": 25, "source": {"video": "assets/media/badminton_racket/source.mp4", "aspect": 0.5625}}, "barbell": {"frameCount": 114, "fps": 30.0, "renderSize": 1024, "renderHeight": 1820, "focalX": 2088.6822916666665, "focalY": 2088.1723594665527, "assets": [{"mode": "gs", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/barbell/orbit_gs_both_elev+10.mp4", "poster": "assets/media/barbell/orbit_gs_both_elev+10.jpg"}, {"mode": "gs", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/barbell/orbit_gs_both_elev+15.mp4", "poster": "assets/media/barbell/orbit_gs_both_elev+15.jpg"}, {"mode": "gs", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/barbell/orbit_gs_both_elev+20.mp4", "poster": "assets/media/barbell/orbit_gs_both_elev+20.jpg"}, {"mode": "gs", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/barbell/orbit_gs_both_elev+25.mp4", "poster": "assets/media/barbell/orbit_gs_both_elev+25.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/barbell/orbit_mesh_both_elev+10.mp4", "poster": "assets/media/barbell/orbit_mesh_both_elev+10.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/barbell/orbit_mesh_both_elev+15.mp4", "poster": "assets/media/barbell/orbit_mesh_both_elev+15.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/barbell/orbit_mesh_both_elev+20.mp4", "poster": "assets/media/barbell/orbit_mesh_both_elev+20.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/barbell/orbit_mesh_both_elev+25.mp4", "poster": "assets/media/barbell/orbit_mesh_both_elev+25.jpg"}], "frameScale": 1.0, "azimuthMin": -75.0, "azimuthMax": 75.0, "azimuthSweep": "pingpong", "sweepSign": -1.0, "azimuthCycles": 1, "cameraDistance": 1.85, "subjectBottom": 0.8520054945054945, "elevationMin": 10, "elevationMax": 25, "source": {"video": "assets/media/barbell/source.mp4", "aspect": 0.5625}}, "bass_guitar": {"frameCount": 322, "fps": 29.97, "renderSize": 1024, "renderHeight": 1830, "focalX": 2089.2457386363635, "focalY": 2088.346632618015, "assets": [{"mode": "gs", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/bass_guitar/orbit_gs_both_elev+10.mp4", "poster": "assets/media/bass_guitar/orbit_gs_both_elev+10.jpg"}, {"mode": "gs", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/bass_guitar/orbit_gs_both_elev+15.mp4", "poster": "assets/media/bass_guitar/orbit_gs_both_elev+15.jpg"}, {"mode": "gs", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/bass_guitar/orbit_gs_both_elev+20.mp4", "poster": "assets/media/bass_guitar/orbit_gs_both_elev+20.jpg"}, {"mode": "gs", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/bass_guitar/orbit_gs_both_elev+25.mp4", "poster": "assets/media/bass_guitar/orbit_gs_both_elev+25.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 10, "azimuth": null, "video": "assets/media/bass_guitar/orbit_mesh_both_elev+10.mp4", "poster": "assets/media/bass_guitar/orbit_mesh_both_elev+10.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 15, "azimuth": null, "video": "assets/media/bass_guitar/orbit_mesh_both_elev+15.mp4", "poster": "assets/media/bass_guitar/orbit_mesh_both_elev+15.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 20, "azimuth": null, "video": "assets/media/bass_guitar/orbit_mesh_both_elev+20.mp4", "poster": "assets/media/bass_guitar/orbit_mesh_both_elev+20.jpg"}, {"mode": "mesh", "entities": "both", "elevation": 25, "azimuth": null, "video": "assets/media/bass_guitar/orbit_mesh_both_elev+25.mp4", "poster": "assets/media/bass_guitar/orbit_mesh_both_elev+25.jpg"}], "frameScale": 1.0, "azimuthMin": -75.0, "azimuthMax": 75.0, "azimuthSweep": "pingpong", "sweepSign": -1.0, "azimuthCycles": 2, "cameraDistance": 1.85, "subjectBottom": 0.7524590163934426, "elevationMin": 10, "elevationMax": 25, "source": {"video": "assets/media/bass_guitar/source.mp4", "aspect": 0.559322033898305}}};
+      const FIRST = "basketball";
+      const wanted = new URLSearchParams(location.search).get('s');
+      return SAMPLES[wanted] || SAMPLES[FIRST];
+    })();
+    const stage = document.querySelector('#stage');
+    const canvas = document.querySelector('canvas');
+    const status = document.querySelector('#status');
+    const toggle = document.querySelector('#toggle');
+    const captureButton = document.querySelector('#capture');
+    const captureLabel = document.querySelector('#capture-label');
+    const scrub = document.querySelector('#scrub');
+    const elapsed = document.querySelector('#elapsed');
+    const turnBoxes = [...document.querySelectorAll('input[name=turn]')];
+    const humanBox = document.querySelector('#human');
+    const objectBox = document.querySelector('#object');
+    const modeBoxes = [...document.querySelectorAll('input[name=mode]')];
+    const renderer = new WebGLRenderer({canvas, antialias: true, alpha: false});
+    renderer.setClearColor(0x000000, 1);
+    const scene = new Scene();
+    scene.fog = new Fog(0x000000, 6, 22);
+    const camera = new PerspectiveCamera(38, 1, 0.05, 400);
+    camera.layers.enable(1);
+
+    const DEG = Math.PI / 180;
+    // The reconstruction has a fixed size in world units, so the whole scene is
+    // framed by how far the camera sits back.
+    const FRAME_SCALE = CONFIG.frameScale > 0 ? CONFIG.frameScale : 1;
+    const BASE_DISTANCE = 4.4 / FRAME_SCALE;
+    const MIN_ZOOM = 0.4;
+    const MAX_ZOOM = 5;
+    // Fog follows the camera instead of sitting at fixed depths, otherwise
+    // zooming out simply fades the subject into the black background.
+    const FOG_NEAR_RATIO = 6 / 4.4;
+    const FOG_FAR_RATIO = 22 / 4.4;
+    // The orbit is only pre-rendered across this arc, so the viewer may not
+    // swing past it. createOrbitOffset clamps its own pitch to ±0.9 rad, and the
+    // downward half of that travel drives the pre-rendered elevation ladder.
+    const AZIMUTH_SPAN = CONFIG.azimuthMax - CONFIG.azimuthMin;
+    const AZIMUTH_MID = (CONFIG.azimuthMin + CONFIG.azimuthMax) / 2;
+    const YAW_MIN = CONFIG.azimuthMin * DEG;
+    const YAW_MAX = CONFIG.azimuthMax * DEG;
+    const MAX_PITCH = 0.9;
+    // How much of the drag reaches the azimuth. createOrbitOffset turns a
+    // pointer into an angle at its own pace, which sends the view flying across
+    // the whole arc in a short flick; at 0.1 the same hand movement covers ten
+    // times less ground. The helper's own angle is allowed to run that much
+    // further so the arc can still be reached end to end.
+    const DRAG_SCALE = 0.1;
+    // Everything plays at this rate: the atlases, and the source clip with them.
+    // The clock is read off whichever atlas is on screen, so slowing them all
+    // down keeps the page in sync without touching the timing maths.
+    const PLAYBACK_RATE = 0.75;
+    // In sweep the playback *is* the rotation, so it runs slower again; in view
+    // mode playback is only the motion and keeps its own pace.
+    const SWEEP_RATE = PLAYBACK_RATE * 0.93;
+    const playbackRate = () => (turning() === 'sweep' ? SWEEP_RATE : PLAYBACK_RATE);
+
+    // createAtlas keeps its <video> to itself -- it is a decode source, never in
+    // the DOM -- so the only handle on it is the texture it feeds. The billboard
+    // composites colour over its matte in a shader, so that texture is a uniform
+    // rather than material.map, and it is swapped in only once the video has
+    // decoded: this has to be retried until it finds something, or the playback
+    // rate is set on nothing at all.
+    function videoElement(flight) {
+      let element = null;
+      const consider = texture => {
+        if (!element && texture && texture.image instanceof HTMLVideoElement) {
+          element = texture.image;
+        }
+      };
+      flight.group.traverse(node => {
+        if (!node.material) return;
+        for (const material of [].concat(node.material)) {
+          consider(material.map);
+          if (!material.uniforms) continue;
+          for (const name of Object.keys(material.uniforms)) {
+            const uniform = material.uniforms[name];
+            consider(uniform && uniform.value);
+          }
+        }
+      });
+      return element;
+    }
+
+    // Sizes relative to the 4DAnyone defaults: the reconstruction twice as
+    // large, the turntable half again as wide. The billboard's height and its
+    // stand-off from the floor scale together, so the feet keep meeting the disc.
+    const SUBJECT_SCALE = 2;
+    const GROUND_SCALE = 1.5;
+    // Camera distances past the 1.15 baseline leave margin around the subject
+    // inside each rendered frame; the billboard grows by the same factor so the
+    // subject itself keeps its size on screen and the turntable keeps its own.
+    const RENDER_PADDING = Math.max(1, (CONFIG.cameraDistance || 1.15) / 1.15);
+    // The reconstruction and the camera prop that rides on it, half again as
+    // large against the same stage. It multiplies the billboard only, not
+    // SUBJECT_SCALE, so the turntable and the grid keep the size they have --
+    // and nothing here touches what was rendered.
+    const SUBJECT_ZOOM = 1.5;
+    const DISPLAY_SCALE = (SUBJECT_SCALE * RENDER_PADDING * SUBJECT_ZOOM) / 3;
+    const rigRadius = 3;
+    // createFlight sizes the billboard from the rig; the feet sit this far below
+    // its centre, so lifting the group by that much stands them on the disc.
+    const planeHeight =
+      (rigRadius * (CONFIG.renderHeight || CONFIG.renderSize)) / CONFIG.focalY *
+      DISPLAY_SCALE;
+    // createFlight sizes the billboard off fy on both axes, which is right only
+    // when the tile has square pixels. A tile rendered square from a portrait
+    // clip does not: the renderer scaled the source intrinsics by width and by
+    // height separately, so the picture is wider than it should be by fx/fy.
+    // Squeezing the plane by fy/fx undoes exactly that, without re-rendering.
+    // Clips whose manifest predates focal_x get it from the source shape --
+    // the source pixels are square, so fx/fy is (width/height) / aspect.
+    const FOCAL_X = CONFIG.focalX > 0
+      ? CONFIG.focalX
+      : (CONFIG.source && CONFIG.source.aspect > 0
+        ? CONFIG.focalY * (CONFIG.renderSize / (CONFIG.renderHeight || CONFIG.renderSize))
+          / CONFIG.source.aspect
+        : CONFIG.focalY);
+    const SQUEEZE_X = CONFIG.focalY / Math.max(1e-6, FOCAL_X);
+    const SUBJECT_Y = (CONFIG.subjectBottom - 0.5) * planeHeight;
+    const target = new Vector3(0, SUBJECT_Y, 0);
+    const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+
+    // Mirrors _sweep_azimuth() in the renderer: which azimuth the pre-rendered
+    // frame at `sweep` (0..1 of the clip) was shot from.
+    // However many times the render crossed the arc over the clip. The
+    // turntable turns under the subject by this, so it has to count the same.
+    const SWEEP_CYCLES = CONFIG.azimuthCycles > 0 ? CONFIG.azimuthCycles : 1;
+    // Which end of the arc the rendered sweep turned to first. The turntable
+    // has to match, or the ground turns under a subject going the other way.
+    const SWEEP_SIGN = CONFIG.sweepSign || -1;
+    function sweepAzimuth(sweep) {
+      if (CONFIG.azimuthSweep === 'pingpong') {
+        return AZIMUTH_MID
+          + SWEEP_SIGN * 0.5 * AZIMUTH_SPAN
+            * Math.sin(2 * Math.PI * SWEEP_CYCLES * sweep);
+      }
+      return CONFIG.azimuthMin + ((sweep * SWEEP_CYCLES) % 1) * AZIMUTH_SPAN;
+    }
+
+    const orbitCameras = Array.from({length: CONFIG.frameCount}, (_, index) => {
+      const sweep = index / Math.max(1, CONFIG.frameCount - 1);
+      // Same arc the frames were rendered on, in the viewer's yaw convention.
+      const azimuth = sweepAzimuth(sweep) * DEG;
+      const matrix = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+      matrix[12] = target.x + rigRadius * Math.sin(azimuth);
+      matrix[13] = target.y;
+      matrix[14] = target.z + rigRadius * Math.cos(azimuth);
+      return {
+        matrix,
+        fy: CONFIG.focalY,
+        width: CONFIG.renderSize,
+        height: CONFIG.renderHeight || CONFIG.renderSize,
+      };
+    });
+    const orbit = {cameras: orbitCameras};
+
+    // One pre-rendered set per render mode and per human/object selection; each
+    // set is an elevation ladder. Videos are only built for what gets shown.
+    const catalogue = new Map();
+    for (const asset of CONFIG.assets) {
+      const key = `${asset.mode}|${asset.entities}`;
+      if (!catalogue.has(key)) catalogue.set(key, []);
+      catalogue.get(key).push(asset);
+    }
+    for (const assets of catalogue.values()) {
+      assets.sort((a, b) => a.elevation - b.elevation);
+    }
+    // Fixed-azimuth renders let dragging turn the subject: each step is its own
+    // clip, so the angle is chosen by the viewer rather than by the clip's time.
+    const AZIMUTH_STEPS = [...new Set(
+      CONFIG.assets.map(asset => asset.azimuth).filter(value => value !== null),
+    )].sort((a, b) => a - b);
+    // Sweep: one clip whose camera walks the arc as it plays, so the subject
+    // turns on its own, smoothly, and a drag has no angle to pick. View: a clip
+    // per azimuth, so a drag turns the subject and nothing turns by itself.
+    const HAS_SWEEP = CONFIG.assets.some(asset => asset.azimuth === null);
+    const HAS_VIEWS = AZIMUTH_STEPS.length > 1;
+    // Half the gap between two rendered azimuths: the most the camera can be
+    // away from the view on screen once the right one has arrived.
+    const HALF_STEP = HAS_VIEWS
+      ? 0.5 * Math.abs(AZIMUTH_STEPS[1] - AZIMUTH_STEPS[0]) * DEG : 0;
+    for (const box of turnBoxes) {
+      box.disabled = box.value === 'sweep' ? !HAS_SWEEP : !HAS_VIEWS;
+      if (box.disabled && box.checked) {
+        box.checked = false;
+        const other = turnBoxes.find(candidate => candidate !== box);
+        if (other) other.checked = true;
+      }
+    }
+    function turning() {
+      const checked = turnBoxes.find(box => box.checked && !box.disabled);
+      return checked ? checked.value : (HAS_VIEWS ? 'view' : 'sweep');
+    }
+    const nearestAzimuth = degrees => AZIMUTH_STEPS.reduce(
+      (best, step) => (Math.abs(step - degrees) < Math.abs(best - degrees) ? step : best),
+      AZIMUTH_STEPS[0],
+    );
+
+    // Nothing to switch between unless human-only or object-only was rendered.
+    if (![...catalogue.keys()].some(key => !key.endsWith('|both'))) {
+      document.querySelector('#entity-row').hidden = true;
+    }
+
+    const built = new Map();
+    // Sets are kept in least-recently-used order. Only three ever decode at
+    // once (on screen, warming up, and the one the drag is heading for); the
+    // rest are paused and held so turning back does not rebuild them. Each set
+    // is one elevation ladder, so this many sets is that many times four video
+    // elements -- the ceiling on what the page holds open.
+    const BUILT_LIMIT = 5;
+    function evict(keep) {
+      while (built.size > BUILT_LIMIT) {
+        let victim = null;
+        for (const candidate of built.keys()) {
+          if (candidate === keep || candidate === activeKey
+              || candidate === pendingKey || candidate === prefetchKey) continue;
+          victim = candidate;
+          break;
+        }
+        if (victim === null) break;
+        for (const layer of built.get(victim)) {
+          scene.remove(layer.flight.group);
+          if (layer.flight.dispose) layer.flight.dispose();
+          if (layer.video.dispose) layer.video.dispose();
+        }
+        built.delete(victim);
+      }
+    }
+    function buildLayers(key, step) {
+      const cacheKey = `${key}|${step}`;
+      const cached = built.get(cacheKey);
+      if (cached) {
+        built.delete(cacheKey);
+        built.set(cacheKey, cached);
+        return cached;
+      }
+      const wanted = catalogue.get(key).filter(asset => asset.azimuth === step);
+      const layers = wanted.map(asset => {
+        const video = createAtlas({
+          src: asset.video,
+          poster: asset.poster,
+          columns: 1,
+          rows: 1,
+          masked: true,
+        });
+        const flight = createFlight({orbit, video, centre: [0, 0, 0]});
+        if (!flight) throw new Error('Could not create the 4D reconstruction billboard');
+        flight.target.y = SUBJECT_Y;
+        flight.group.visible = false;
+        scene.add(flight.group);
+        const layer = {asset, video, flight, element: null, warm: false};
+        // Resolved once the clip has decoded, which is when the texture finally
+        // carries the video. Hunting for it every frame instead costs a full
+        // material walk per layer per frame, for nothing.
+        video.ready.then(
+          () => {
+            layer.element = videoElement(flight);
+            if (layer.element) layer.element.playbackRate = playbackRate();
+          },
+          () => {},
+        );
+        return layer;
+      });
+      built.set(cacheKey, layers);
+      evict(cacheKey);
+      return layers;
+    }
+
+    const GRID_COLOR = new Color(0x93a9dc);
+    const groundRadius = rigRadius * GROUND_SCALE;
+    const subjectRadius = 0.9 * SUBJECT_SCALE;
+    // createGround sizes the turntable itself well inside the radius it is
+    // given -- min(max(r * 0.3, subjectRadius + 0.25), r * 0.6) -- so the grid
+    // has to pick up from that, not from the rig radius, or a black ring is
+    // left between the disc and the first ring.
+    const discRadius = Math.min(
+      Math.max(groundRadius * 0.3, subjectRadius + 0.25),
+      groundRadius * 0.6,
+    );
+    const ground = createGround(
+      {centre: [0, 0, 0], radius: groundRadius},
+      {subjectRadius},
+    );
+    // Its own two-ring grid is replaced by the cylinder below; keep the disc.
+    ground.setOpacity(0, 1);
+    // The disc ships as neutral slate. Its texture is multiplied by the
+    // material colour, so tinting by the grid hue -- normalised to luminance 1
+    // so the disc keeps its weight -- puts the two in the same family.
+    const discTint = GRID_COLOR.clone();
+    discTint.multiplyScalar(
+      1 / (0.2126 * GRID_COLOR.r + 0.7152 * GRID_COLOR.g + 0.0722 * GRID_COLOR.b),
+    );
+    ground.group.traverse(node => {
+      if (node.isMesh && node.material && node.material.color) {
+        node.material.color.copy(discTint);
+      }
+    });
+    scene.add(ground.group);
+
+    // Backdrop: a wireframe cylinder standing around the turntable -- a polar
+    // grid on the floor (rings plus spokes, the disc sitting at its centre) and
+    // a matching grid on the wall, so the two read as one cylinder. Additive
+    // over black and faded at the edges, it stays scenery behind the subject.
+    const gridRadius = groundRadius * 1.8;
+    const gridHeight = gridRadius * 0.8;
+    const gridSpokes = 48;
+    const gridStep = 0.6;
+    const gridUniforms = () => ({
+      uSpokes: {value: gridSpokes},
+      uStep: {value: gridStep},
+      uRadius: {value: gridRadius},
+      uInner: {value: discRadius},
+      uHeight: {value: gridHeight},
+      uColor: {value: GRID_COLOR.clone()},
+      uOpacity: {value: 1},
+    });
+    // Distance to the nearest line of a repeating set, softened by one pixel of
+    // the coordinate's own screen footprint so line weight is resolution free.
+    const GRID_LINE = `
+      float lineMask(float coord, float period, float width) {
+        float scaled = coord / period;
+        float edge = min(fract(scaled), 1.0 - fract(scaled));
+        float footprint = max(fwidth(scaled), 1e-5);
+        return 1.0 - smoothstep(0.0, footprint * width, edge);
+      }
+      float inked(float a, float b) {
+        return max(a, b);
+      }
+    `;
+    const gridVertex = `
+      varying vec3 vLocal;
+      void main() {
+        vLocal = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+    const wallMaterial = new ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: BackSide,
+      blending: AdditiveBlending,
+      uniforms: gridUniforms(),
+      vertexShader: gridVertex,
+      fragmentShader: `
+        uniform float uSpokes;
+        uniform float uStep;
+        uniform float uHeight;
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        varying vec3 vLocal;
+        ${GRID_LINE}
+        void main() {
+          float height = vLocal.y + uHeight * 0.5;
+          float angle = atan(vLocal.z, vLocal.x) / 6.2831853 + 0.5;
+          float core = inked(lineMask(angle, 1.0 / uSpokes, 1.1),
+                             lineMask(height, uStep, 1.1));
+          float glow = inked(lineMask(angle, 1.0 / uSpokes, 5.0),
+                             lineMask(height, uStep, 5.0));
+          // Solid where the wall meets the floor, gone before the open top edge.
+          float fade = smoothstep(1.0, 0.12, height / uHeight);
+          gl_FragColor = vec4(uColor, (core * 0.72 + glow * 0.24) * fade * uOpacity);
+        }
+      `,
+    });
+    const gridWall = new Mesh(
+      new CylinderGeometry(gridRadius, gridRadius, gridHeight, 192, 1, true),
+      wallMaterial,
+    );
+    gridWall.position.y = gridHeight / 2;
+    gridWall.frustumCulled = false;
+    scene.add(gridWall);
+
+    const floorMaterial = new ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      side: DoubleSide,
+      blending: AdditiveBlending,
+      uniforms: gridUniforms(),
+      vertexShader: gridVertex,
+      fragmentShader: `
+        uniform float uSpokes;
+        uniform float uStep;
+        uniform float uRadius;
+        uniform float uInner;
+        uniform vec3 uColor;
+        uniform float uOpacity;
+        varying vec3 vLocal;
+        ${GRID_LINE}
+        void main() {
+          float radius = length(vLocal.xy);
+          float angle = atan(vLocal.y, vLocal.x) / 6.2831853 + 0.5;
+          float core = inked(lineMask(angle, 1.0 / uSpokes, 1.1),
+                             lineMask(radius, uStep, 1.1));
+          float glow = inked(lineMask(angle, 1.0 / uSpokes, 5.0),
+                             lineMask(radius, uStep, 5.0));
+          // The turntable owns the middle -- the spokes would only pile up into
+          // moire as they converge -- so the grid picks up at its rim, with just
+          // enough of a ramp to hide the seam.
+          float fade = smoothstep(uInner - uStep * 0.15, uInner + uStep * 0.15, radius);
+          gl_FragColor = vec4(uColor, (core * 0.72 + glow * 0.24) * fade * uOpacity);
+        }
+      `,
+    });
+    const gridFloor = new Mesh(new CircleGeometry(gridRadius, 192), floorMaterial);
+    gridFloor.rotation.x = -Math.PI / 2;
+    gridFloor.position.y = 0.002;
+    gridFloor.frustumCulled = false;
+    scene.add(gridFloor);
+
+    // The clip the reconstruction came from, shown the way a camera frustum is
+    // drawn in a figure: the apex where the phone was, opening back onto an
+    // image plane that keeps facing the front view however the scene turns.
+    // Everything that stands on the turntable shares its rotation.
+    const sourceRig = new Group();
+    scene.add(sourceRig);
+    const clip = document.querySelector('#clip');
+    let sourceVideo = null;
+    if (!CONFIG.source) clip.remove();
+    if (CONFIG.source) {
+      const element = clip;
+      Object.assign(element, {
+        src: CONFIG.source.video,
+        muted: true,
+        loop: true,
+        playsInline: true,
+        crossOrigin: 'anonymous',
+      });
+      element.setAttribute('playsinline', '');
+      element.playbackRate = playbackRate();
+      // Start the box at the clip's own shape; resizing then overrides it.
+      element.addEventListener('loadedmetadata', () => {
+        const box = document.querySelector('#clip-box');
+        if (!box.style.height && element.videoWidth) {
+          box.style.height =
+            `${Math.round(box.clientWidth * element.videoHeight / element.videoWidth)}px`;
+        }
+      }, {once: true});
+      const texture = new VideoTexture(element);
+      texture.colorSpace = SRGBColorSpace;
+
+      // Prop sized, and standing where the clip was actually shot from: +z is
+      // the orbit's azimuth 0, the front of the subject. The lens sits outside
+      // the turntable and the image plane hangs between it and the subject, so
+      // the pyramid opens onto the reconstruction rather than away from it.
+      // The billboard shrinks as the source focal length grows, and the prop
+      // rides on it, so a long-lens clip ends up with a camera too small to
+      // read. basketball-0001 -- a 1024px render off a 906.5px focal length --
+      // is the size that works, and nothing goes below it.
+      const PROP_FLOOR = rigRadius * (1024 / 906.5) * DISPLAY_SCALE;
+      const propHeight = Math.max(planeHeight, PROP_FLOOR);
+      const panelHeight = propHeight * 0.095;
+      const panelWidth = panelHeight * (CONFIG.source.aspect || 0.5625);
+      const focalDepth = panelWidth * 1.3;
+      const centreY = propHeight * 0.26;
+      const apexZ = groundRadius * 0.85 + focalDepth;
+      const panelZ = apexZ - focalDepth;
+
+      const panel = new Mesh(
+        new PlaneGeometry(panelWidth, panelHeight),
+        new MeshBasicMaterial({map: texture, toneMapped: false, side: DoubleSide}),
+      );
+      panel.position.set(0, centreY, panelZ);
+      sourceRig.add(panel);
+
+      const halfWidth = panelWidth / 2;
+      const halfHeight = panelHeight / 2;
+      const corners = [
+        [-halfWidth, centreY - halfHeight, panelZ],
+        [halfWidth, centreY - halfHeight, panelZ],
+        [halfWidth, centreY + halfHeight, panelZ],
+        [-halfWidth, centreY + halfHeight, panelZ],
+      ];
+      const apex = [0, centreY, apexZ];
+      const segments = [];
+      corners.forEach((corner, index) => {
+        segments.push(apex, corner, corner, corners[(index + 1) % corners.length]);
+      });
+      const frustum = new LineSegments(
+        new BufferGeometry().setAttribute(
+          'position',
+          new BufferAttribute(new Float32Array(segments.flat()), 3),
+        ),
+        new LineBasicMaterial({
+          color: new Color(0x7ef0d0),
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+        }),
+      );
+      sourceRig.add(frustum);
+      sourceVideo = element;
+    }
+
+    const orbitOffset = createOrbitOffset(canvas, {
+      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    });
+    // Idle drift would just park the camera against the azimuth limit.
+    if (orbitOffset.setDrifting) orbitOffset.setDrifting(false);
+    const eye = new Vector3();
+    let previous = performance.now();
+    let zoom = MIN_ZOOM;
+    let zoomTarget = MIN_ZOOM;
+    let distance = BASE_DISTANCE;
+    let azimuth = 0;
+    let elevation = CONFIG.elevationMin;
+    let selected = 0;
+    let playing = true;
+    let clock = 0;
+    let spin = 0;
+    let dragging = false;
+    let activeStep = null;
+    // While a sweeping clip plays, the turntable is driven by the orbit the
+    // frames were shot on: a frame taken from azimuth A is the same picture as
+    // the subject having turned -A, so the disc, the grid and the source camera
+    // turn with it and the scene reads as one rotation.
+    let active = [];
+    let activeKey = '';
+    // A set being warmed up off screen, and the neighbour a continuing drag
+    // will reach next. Both decode alongside the visible one so that arriving
+    // at them costs nothing.
+    let pending = [];
+    let pendingKey = '';
+    let pendingStep = null;
+    let pendingSince = 0;
+    let prefetchKey = '';
+    let turnDirection = 1;
+    let lastAzimuth = 0;
+    let scrubbing = false;
+    // The atlas exposes currentTime but no duration; the clip is the orbit.
+    const DURATION = Math.max(0.001, CONFIG.frameCount / CONFIG.fps);
+
+    function selectedEntities() {
+      if (humanBox.checked && objectBox.checked) return 'both';
+      if (humanBox.checked) return 'human';
+      if (objectBox.checked) return 'object';
+      return '';
+    }
+
+    function selectedMode() {
+      const checked = modeBoxes.find(box => box.checked);
+      return checked ? checked.value : 'gs';
+    }
+
+    function syncControls() {
+      const entities = selectedEntities();
+      for (const box of modeBoxes) {
+        box.disabled = !entities || !catalogue.has(`${box.value}|${entities}`);
+      }
+      // A box may only be toggled if what it would leave behind was rendered;
+      // showing nothing at all is always allowed.
+      const mode = selectedMode();
+      const rendered = value => !value || catalogue.has(`${mode}|${value}`);
+      const entitiesFor = (human, object) =>
+        human && object ? 'both' : human ? 'human' : object ? 'object' : '';
+      humanBox.disabled = !rendered(entitiesFor(!humanBox.checked, objectBox.checked));
+      objectBox.disabled = !rendered(entitiesFor(humanBox.checked, !objectBox.checked));
+    }
+
+    // The azimuth step the viewer is asking for, which is not what is on screen
+    // until its clip has caught up.
+    function wantedStep() {
+      return pendingKey ? pendingStep : activeStep;
+    }
+
+    // A set may go on screen once its billboard has decoded a frame at the time
+    // the clip is at. Showing it any earlier is the blink: the billboard falls
+    // back to its poster, which is frame 0 of a different pose, or to nothing.
+    function showable(layers) {
+      if (!layers.length) return false;
+      const {video} = layers[nearestLayer(layers, elevation)];
+      return video.frame(CONFIG.fps, CONFIG.frameCount) >= 0
+        && Math.abs(video.currentTime - clock) < 0.25;
+    }
+
+    function dropPending() {
+      pending = [];
+      pendingKey = '';
+      pendingStep = null;
+      pendingSince = 0;
+    }
+
+    function promote() {
+      if (!pending.length) return;
+      for (const {flight} of active) flight.group.visible = false;
+      active = pending;
+      activeKey = pendingKey;
+      activeStep = pendingStep;
+      dropPending();
+      selected = nearestLayer(active, elevation);
+      for (const {flight} of active) flight.group.visible = true;
+    }
+
+    // Which sets are allowed to decode. Everything else is paused, so turning
+    // does not leave a dozen clips running in the background.
+    // A whole elevation ladder decoding at once is four 1024x2048 streams, and
+    // three ladders of that is a dozen -- which is what makes the page stutter.
+    // Only the step on screen and its neighbours run: the neighbours so that a
+    // vertical drag lands on something already decoded, and for the sets being
+    // warmed up only the step that would actually be shown.
+    // The ladder on screen runs in full. A rung that is paused sits whereever it
+    // was left -- usually its first frame, which in sweep is the front view --
+    // so landing a vertical drag on one showed that for an instant before it
+    // caught up. Keeping the whole ladder in step costs four decoders, and only
+    // for the set actually being looked at: the ones being warmed up or read
+    // ahead of the drag still run just the rung that would be shown.
+    function isWarm(cacheKey, layers, index) {
+      if (cacheKey === activeKey) return true;
+      if (cacheKey === pendingKey || cacheKey === prefetchKey) {
+        return index === nearestLayer(layers, elevation);
+      }
+      return false;
+    }
+
+    function syncWarm() {
+      const master = active.length
+        ? active[Math.min(selected, active.length - 1)].video : null;
+      const rate = playbackRate();
+      if (sourceVideo && sourceVideo.playbackRate !== rate) sourceVideo.playbackRate = rate;
+      for (const [cacheKey, layers] of built) {
+        layers.forEach((layer, index) => {
+          const warm = isWarm(cacheKey, layers, index);
+          if (layer.element && layer.element.playbackRate !== rate) {
+            layer.element.playbackRate = rate;
+          }
+          if (layer.warm !== warm) {
+            layer.warm = warm;
+            if (warm && playing) layer.video.play();
+            else layer.video.pause();
+          }
+          // The clip on screen keeps the clock; everything else is pulled to it.
+          if (warm && layer.video !== master) layer.video.follow(clock, 2 / CONFIG.fps);
+        });
+      }
+    }
+
+    function applySelection() {
+      const entities = selectedEntities();
+      const step = turning() === 'view' ? nearestAzimuth(azimuth / DEG) : null;
+      const key = entities ? `${selectedMode()}|${entities}` : '';
+      syncControls();
+      const wantedKey = key && catalogue.has(key) ? `${key}|${step}` : '';
+      if (wantedKey === activeKey) {
+        dropPending();
+        return;
+      }
+      if (wantedKey === pendingKey) return;
+      dropPending();
+      if (!wantedKey) {
+        for (const {flight} of active) flight.group.visible = false;
+        active = [];
+        activeKey = '';
+        activeStep = null;
+        return;
+      }
+      pendingKey = wantedKey;
+      pendingStep = step;
+      pendingSince = performance.now();
+      pending = buildLayers(key, step);
+      for (const {flight} of pending) flight.group.visible = false;
+      syncWarm();
+      // Nothing on screen to hold on to, so there is no blink to avoid.
+      if (!active.length) promote();
+    }
+
+    // Build the neighbour the drag is heading for while the current set is
+    // still on screen, so crossing into it is a swap rather than a load.
+    function prefetchAhead() {
+      prefetchKey = '';
+      if (turning() !== 'view' || activeStep === null) return;
+      const entities = selectedEntities();
+      const key = entities ? `${selectedMode()}|${entities}` : '';
+      if (!key || !catalogue.has(key)) return;
+      const ahead = AZIMUTH_STEPS[
+        AZIMUTH_STEPS.indexOf(wantedStep()) + (turnDirection >= 0 ? 1 : -1)
+      ];
+      if (ahead === undefined) return;
+      prefetchKey = `${key}|${ahead}`;
+      if (!built.has(prefetchKey)) buildLayers(key, ahead);
+    }
+
+    for (const box of [...modeBoxes, humanBox, objectBox]) {
+      box.addEventListener('change', applySelection);
+    }
+
+    // Both render styles of exactly what is on screen -- same selection, same
+    // elevation, same frame -- cut straight out of the pre-rendered atlases by
+    // the server, so the saved PNGs keep their alpha instead of the page's
+    // black background.
+    function download(file) {
+      const binary = atob(file.data);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index++) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+      const url = URL.createObjectURL(new Blob([bytes], {type: 'image/png'}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    let capturing = false;
+    async function capture() {
+      const entities = selectedEntities();
+      if (!entities || !active.length || capturing) return;
+      capturing = true;
+      captureButton.disabled = true;
+      const previous = captureLabel.textContent;
+      captureLabel.textContent = 'Saving…';
+      try {
+        const response = await fetch('/capture', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            entities,
+            elevation: active[selected].asset.elevation,
+            azimuth: active[selected].asset.azimuth,
+            frame: Math.min(
+              CONFIG.frameCount - 1,
+              Math.max(0, Math.round(clock * CONFIG.fps)),
+            ),
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || response.statusText);
+        result.files.forEach((file, index) => {
+          // Staggered: browsers question a burst of downloads fired at once.
+          setTimeout(() => download(file), index * 200);
+        });
+        captureLabel.textContent = `Saved ${result.files.length}`;
+      } catch (error) {
+        captureLabel.textContent = 'Failed';
+        console.error(error);
+      }
+      setTimeout(() => {
+        captureLabel.textContent = previous;
+        captureButton.disabled = false;
+        capturing = false;
+      }, 1400);
+    }
+    captureButton.addEventListener('click', capture);
+
+    // Elevation is never faked by tilting the billboard: every step of the
+    // ladder is its own pre-rendered orbit, and dragging picks the nearest one.
+    function elevationFromDrag() {
+      const amount = clamp(orbitOffset.state.pitch / MAX_PITCH, 0, 1);
+      return CONFIG.elevationMin
+        + amount * (CONFIG.elevationMax - CONFIG.elevationMin);
+    }
+
+    // The azimuth the frame on screen was shot from, for the clip that sweeps
+    // the arc as it plays. Zero when each azimuth is its own clip: there the
+    // drag picks the angle outright and nothing is added to it.
+    function clipSweepAzimuth() {
+      if (turning() !== 'sweep' || !active.length) return 0;
+      const shown = active[Math.min(selected, active.length - 1)].video;
+      const sweep = shown.frame(CONFIG.fps, CONFIG.frameCount);
+      if (sweep < 0) return 0;
+      return sweepAzimuth(sweep / Math.max(1, CONFIG.frameCount - 1)) * DEG;
+    }
+
+    function nearestLayer(layers, degrees) {
+      let nearest = 0;
+      for (let index = 1; index < layers.length; index++) {
+        if (Math.abs(layers[index].asset.elevation - degrees)
+            < Math.abs(layers[nearest].asset.elevation - degrees)) nearest = index;
+      }
+      return nearest;
+    }
+
+    function seek(seconds) {
+      clock = Math.max(0, Math.min(DURATION, seconds));
+      active.forEach(({video}) => video.follow(clock, 0.01));
+      if (sourceVideo) sourceVideo.currentTime = clock;
+    }
+    scrub.addEventListener('pointerdown', () => { scrubbing = true; });
+    addEventListener('pointerup', () => { scrubbing = false; });
+    scrub.addEventListener('input', () => seek(Number(scrub.value) * DURATION));
+
+    // The source clip runs on its own and is only pulled back now and then.
+    // It is a variable-frame-rate file whose duration does not match the orbit's
+    // to the frame, and a browser lands a seek on the nearest time it can decode
+    // rather than the one asked for -- so nudging it every frame the way the
+    // atlases are nudged left it seeking forever and never playing.
+    let sourceSyncedAt = 0;
+    function followSource(now) {
+      if (!sourceVideo || sourceVideo.seeking) return;
+      if (now - sourceSyncedAt < 1000) return;
+      if (Math.abs(sourceVideo.currentTime - clock) < 0.35) return;
+      sourceSyncedAt = now;
+      sourceVideo.currentTime = clock;
+    }
+
+    let elapsedText = '';
+    function updateTransport() {
+      if (!scrubbing) scrub.value = String((clock % DURATION) / DURATION);
+      const text = `${clock.toFixed(2)} / ${DURATION.toFixed(2)}`;
+      if (text === elapsedText) return;
+      elapsedText = text;
+      elapsed.textContent = text;
+    }
+
+    function resize() {
+      const width = innerWidth;
+      const height = innerHeight;
+      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function frame(now) {
+      const dt = Math.min((now - previous) / 1000, 0.1);
+      previous = now;
+      orbitOffset.update(dt);
+      zoom += (zoomTarget - zoom) * Math.min(1, dt * 12);
+      distance = BASE_DISTANCE / zoom;
+      scene.fog.near = distance * FOG_NEAR_RATIO;
+      scene.fog.far = distance * FOG_FAR_RATIO;
+      // With one sweeping clip the picture already carries an azimuth of its
+      // own and the drag adds to it, so what is being looked at is the sum of
+      // the two. Only the rendered arc exists, so the drag has to be bounded by
+      // what the clip has left of it rather than by the arc itself -- otherwise
+      // the pair walk past 90° together and the stage turns round to a side
+      // that was never rendered.
+      const clipAzimuth = clipSweepAzimuth();
+      if (turning() === 'sweep') {
+        // The clip owns the azimuth here, so a horizontal drag has nothing to
+        // move and is simply ignored -- dragging up and down still walks the
+        // elevation ladder, which is rendered per angle either way.
+        orbitOffset.state.yaw = 0;
+        orbitOffset.state.drift = 0;
+        azimuth = 0;
+      } else {
+        orbitOffset.state.yaw = clamp(
+          orbitOffset.state.yaw, YAW_MIN / DRAG_SCALE, YAW_MAX / DRAG_SCALE,
+        );
+        azimuth = clamp(
+          (orbitOffset.state.yaw + orbitOffset.state.drift) * DRAG_SCALE,
+          YAW_MIN,
+          YAW_MAX,
+        );
+      }
+      // The camera rises to the elevation being shown, so the turntable tilts
+      // along with it instead of staying pinned to one perspective.
+      elevation += (elevationFromDrag() - elevation) * Math.min(1, dt * 10);
+      const pitch = elevation * DEG;
+      eye.set(
+        target.x + distance * Math.sin(azimuth) * Math.cos(pitch),
+        target.y + distance * Math.sin(pitch),
+        target.z + distance * Math.cos(azimuth) * Math.cos(pitch),
+      );
+      camera.position.copy(eye);
+      camera.lookAt(target);
+      if (active.length) {
+        const master = active[Math.min(selected, active.length - 1)].video;
+        clock = master.currentTime;
+        followSource(now);
+        selected = nearestLayer(active, elevation);
+        // The billboard itself is never tilted, so undo the vertical
+        // foreshortening the raised camera would add to the pre-rendered frame.
+        const stretch = 1 / Math.max(0.5, Math.cos(pitch));
+        active.forEach(({asset, flight}, index) => {
+          flight.update(eye, index === selected ? 1 : 0);
+          // Azimuths are rendered every few degrees, and between two of them the
+          // billboard keeps the angle it was shot from instead of turning to
+          // face the camera. The residual then reads as foreshortening -- the
+          // picture stays planted in the scene rather than sliding with the
+          // camera -- and at the boundary the tilt snapping back is what the
+          // step in the picture has already accounted for.
+          if (asset.azimuth !== null) {
+            // Only ever the residual up to half a step. A set that is still
+            // warming up leaves the camera running further and further ahead of
+            // the picture on screen, and letting the plane follow it that far
+            // turns the billboard into a card on a spit -- which reads as the
+            // view never switching at all.
+            flight.group.rotation.y = azimuth
+              + clamp(asset.azimuth * DEG - azimuth, -HALF_STEP, HALF_STEP);
+          }
+          flight.group.scale.set(
+            DISPLAY_SCALE * SQUEEZE_X,
+            DISPLAY_SCALE * stretch,
+            DISPLAY_SCALE,
+          );
+          // The stretch grows the plane about its centre, so the anchor has to
+          // grow with it or the feet slide off the disc as the elevation moves.
+          flight.group.position.y = SUBJECT_Y * stretch;
+        });
+      }
+      if (turning() === 'view') {
+        // The world stays put and the viewer orbits it, so the azimuth the
+        // drag lands on is the clip that gets shown.
+        if (azimuth > lastAzimuth) turnDirection = 1;
+        else if (azimuth < lastAzimuth) turnDirection = -1;
+        lastAzimuth = azimuth;
+        if (nearestAzimuth(azimuth / DEG) !== wantedStep()) applySelection();
+        prefetchAhead();
+        spin = 0;
+      } else {
+        // The subject turns with the clip's own camera path, so the disc turns
+        // under it by the same angle and the scene reads as one rotation.
+        spin = -clipAzimuth;
+      }
+      // The clip that was asked for only reaches the screen once it can draw
+      // the frame the viewer is on; until then the previous one stays up.
+      syncWarm();
+      // Held back until the clip can draw, but never held for long: a decoder
+      // that will not come good must not leave the viewer stuck facing the
+      // angle it was dragged away from.
+      if (pendingKey && (showable(pending) || now - pendingSince > 350)) promote();
+      ground.setSpin(spin);
+      sourceRig.rotation.y = spin;
+      // setSpin turns the disc about its local z, which is world +y; the wall
+      // and the floor grid follow on the same axis so the cylinder tracks it.
+      gridWall.rotation.y = spin;
+      gridFloor.rotation.z = spin;
+      updateTransport();
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    }
+
+    function setPlaying(value) {
+      playing = value;
+      for (const layers of built.values()) {
+        for (const layer of layers) {
+          if (layer.warm) playing ? layer.video.play() : layer.video.pause();
+        }
+      }
+      if (sourceVideo) {
+        if (playing) sourceVideo.play().catch(() => {});
+        else sourceVideo.pause();
+      }
+      toggle.textContent = playing ? 'Pause' : 'Play';
+    }
+    toggle.addEventListener('click', () => setPlaying(!playing));
+    for (const box of turnBoxes) {
+      box.addEventListener('change', () => {
+        // Sweep has no angle to hold on to, so coming back from it starts the
+        // drag from where the arc begins rather than from a stale yaw.
+        orbitOffset.state.yaw = 0;
+        orbitOffset.state.drift = 0;
+        applySelection();
+      });
+    }
+
+    applySelection();
+    Promise.all(active.map(({video}) => video.ready)).then(
+      () => {
+        status.remove();
+        setPlaying(playing);
+      },
+      error => { status.textContent = `Failed to load 4D video: ${error.message}`; },
+    );
+    function zoomBy(factor) {
+      zoomTarget = clamp(zoomTarget * factor, MIN_ZOOM, MAX_ZOOM);
+      if (orbitOffset.notifyActivity) orbitOffset.notifyActivity();
+    }
+    stage.addEventListener('wheel', event => {
+      event.preventDefault();
+      const lines = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+      zoomBy(Math.exp(-event.deltaY * lines * 0.0015));
+    }, {passive: false});
+    addEventListener('keydown', event => {
+      if (event.key === '+' || event.key === '=') zoomBy(1.12);
+      else if (event.key === '-' || event.key === '_') zoomBy(1 / 1.12);
+      else if (event.key === '0') zoomTarget = 1;
+      else if (event.code === 'Space') {
+        event.preventDefault();
+        // The button handles its own Space press through the click event.
+        if (event.target !== toggle) setPlaying(!playing);
+      }
+    });
+    stage.addEventListener('dblclick', () => { zoomTarget = 1; });
+    addEventListener('pointerdown', event => {
+      // A muted clip may only start on a gesture, so any click is one.
+      if (playing) setPlaying(true);
+      if (event.target === canvas) dragging = true;
+    }, {passive: true});
+    addEventListener('pointerup', () => { dragging = false; }, {passive: true});
+    addEventListener('resize', resize);
+    resize();
+    setPlaying(true);
+    requestAnimationFrame(frame);
+  </script>
+
+<nav id="samples" aria-label="Sample">
+  <button type="button" data-sample="basketball" title="basketball"><img src="assets/thumbs/basketball.jpg" alt="basketball" loading="lazy"></button>
+  <button type="button" data-sample="badminton_racket" title="badminton_racket"><img src="assets/thumbs/badminton_racket.jpg" alt="badminton_racket" loading="lazy"></button>
+  <button type="button" data-sample="barbell" title="barbell"><img src="assets/thumbs/barbell.jpg" alt="barbell" loading="lazy"></button>
+  <button type="button" data-sample="bass_guitar" title="bass_guitar"><img src="assets/thumbs/bass_guitar.jpg" alt="bass_guitar" loading="lazy"></button>
+</nav>
+<script>
+  (function () {
+    const current = new URLSearchParams(location.search).get('s') || "basketball";
+    for (const button of document.querySelectorAll('#samples button')) {
+      const name = button.dataset.sample;
+      if (name === current) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => {
+        if (name !== current) location.search = '?s=' + encodeURIComponent(name);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

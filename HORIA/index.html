@@ -180,6 +180,37 @@
 </section>
 
 
+<!-- Interactive demo -->
+<section class="section" id="interactive-demo" style="padding-bottom: 0px;">
+  <div class="container is-max-desktop">
+    <div class="column has-text-centered" style="padding-top: 0px;">
+      <h2 class="title is-4">Interactive demo</h2>
+      <div class="content has-text-justified" style="margin-bottom: 1.5rem;">
+        Drag to sweep the camera around the reconstruction, and switch between the
+        Gaussian and mesh renderings. Everything below is rendered from a single
+        input video.
+      </div>
+      <div class="horia-demo">
+        <iframe src="./static/demo/index.html" title="HORIA interactive demo"
+                loading="lazy" allow="autoplay; fullscreen"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* An iframe rather than inlining the viewer: it brings its own full-page
+     layout, its own three.js, and ids such as #stage that the site theme
+     also uses. */
+  .horia-demo { position: relative; width: 100%; max-width: 1100px;
+                margin: 0 auto; aspect-ratio: 16 / 9; }
+  .horia-demo iframe { position: absolute; inset: 0; width: 100%; height: 100%;
+                       border: 0; border-radius: 12px; background: #000; }
+  @media (max-width: 700px) { .horia-demo { aspect-ratio: 4 / 3; } }
+</style>
+<!-- Interactive demo -->
+
+
 <section class="section">
   <!-- Intro video : 유튜브 영상이 준비되면 아래 주석을 해제하고 VIDEO_ID를 교체하세요 -->
   <!--

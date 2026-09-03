@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HORIA - embed preview</title><style>body{margin:0;font:16px/1.6 system-ui,sans-serif;color:#1b1f24;background:#fff}main{max-width:1100px;margin:0 auto;padding:3rem 1.5rem 5rem}h1{font-size:2rem;margin:0 0 .5rem}p{color:#57606a}</style></head><body><main><h1>HORIA</h1><p>Text above the demo, so the framing can be judged in place.</p><div class="horia-demo">
+  <iframe src="index.html" title="HORIA interactive demo"
+          loading="lazy" allow="autoplay; fullscreen"></iframe>
+</div>
+
+<style>
+  .horia-demo { position: relative; width: 100%; max-width: 1100px;
+                margin: 2rem auto; aspect-ratio: 16 / 9; }
+  .horia-demo iframe { position: absolute; inset: 0; width: 100%; height: 100%;
+                       border: 0; border-radius: 12px; background: #000; }
+  @media (max-width: 700px) { .horia-demo { aspect-ratio: 4 / 3; } }
+</style>
+<p>Text below.</p></main></body></html>
