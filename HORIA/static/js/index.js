@@ -38,6 +38,45 @@ $(document).ready(function() {
       delay: 15000
     });
 
+    // Run the first SOTA row in the opposite direction. Bulma Carousel has no
+    // reverse-autoplay option, so its forward timer is replaced with a small
+    // previous-slide timer while preserving hover and tab-visibility pauses.
+    var reverseCarouselElement = document.querySelector('#results-carousel-1');
+    if (reverseCarouselElement && reverseCarouselElement.bulmaCarousel) {
+      var reverseCarousel = reverseCarouselElement.bulmaCarousel;
+      var reverseCarouselTimer = null;
+
+      reverseCarousel.stop();
+      reverseCarousel.options.autoplay = false;
+
+      function stopReverseCarousel() {
+        if (reverseCarouselTimer !== null) {
+          window.clearInterval(reverseCarouselTimer);
+          reverseCarouselTimer = null;
+        }
+      }
+
+      function startReverseCarousel() {
+        stopReverseCarousel();
+        if (!document.hidden) {
+          reverseCarouselTimer = window.setInterval(function() {
+            reverseCarousel.previous();
+          }, 15000);
+        }
+      }
+
+      reverseCarouselElement.addEventListener('mouseenter', stopReverseCarousel);
+      reverseCarouselElement.addEventListener('mouseleave', startReverseCarousel);
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          stopReverseCarousel();
+        } else {
+          startReverseCarousel();
+        }
+      });
+      startReverseCarousel();
+    }
+
     bulmaCarousel.attach('.carousel-2', {
       slidesToShow: 2,
       slidesToScroll: 1,

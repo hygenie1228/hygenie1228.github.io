@@ -317,6 +317,5 @@ body {
 
 #results-carousel-1 .item,
 #results-carousel-2 .item {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 10px 3px;
 }
