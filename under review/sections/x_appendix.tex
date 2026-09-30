@@ -1,0 +1,412 @@
+\clearpage
+\appendix
+
+\setcounter{section}{0}
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\renewcommand{\thesection}{S\arabic{section}}   
+\renewcommand{\thetable}{S\arabic{table}}   
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+In this supplementary material, we present additional technical details and more experimental results that could not be included in the main manuscript due to the lack of pages.
+The contents are summarized below:
+\begin{itemize}
+\vspace{2.5mm}
+% \item \ref{sec:visual_video}. Visualization in video format
+\item \ref{sec:suppl_text_align}. Evaluation on semantic alignment
+\item \ref{sec:suppl_hdm}. Comparison with HDM
+\item \ref{sec:suppl_contact}. Impact of contact estimation accuracy
+\item \ref{sec:suppl_gs_optim}. Impact of Gaussian attributes optimization
+\item \ref{sec:suppl_g2m}. Impact of Gaussians-to-mesh conversion
+\item \ref{sec:suppl_captioning}. Details of text captioning
+\item \ref{sec:suppl_implementation}. Implementation details
+\item \ref{sec:suppl_limitation}. Limitations and future work
+\item \ref{sec:suppl_more_results}. More qualitative results
+\end{itemize}
+
+
+\subsection{Details of video decomposition}
+\label{sec:supp_decomposition}
+
+This section expands \cref{sec:3.2_decomposition}: the exact signal used to
+propose sub-action boundaries, the motion evidence handed to the captioner, the
+prompts of every language-model call, and the post-processing that fixes the
+final sub-action lengths.
+
+\noindent\textbf{Boundaries from the object trajectory.}
+The relative translation $\mathbf{p}_t$ of \cref{eq:relative_translation} is
+built from the initial human and object motions alone, so it is available before
+any generation or optimization takes place.  We smooth it with a moving average
+over $w=5$ frames, replicating the end frames, which removes single-frame
+tracker jitter without displacing a real regime change by more than two frames.
+The recursion of \cref{eq:rdp} accepts a boundary when its residual exceeds
+$\epsilon=0.1$\,m, and never proposes one within $g=15$ frames of either end of
+the segment it splits; a segment shorter than $2g$ is therefore left intact.
+Because the residual is measured against the straight line through the two
+endpoints, a segment in which the object is carried at a constant relative
+velocity is never split, however long it is, while a segment that reverses or
+stops is split at the reversal.  When either the human or the object track is
+missing, we fall back to uniform windows of $81$ frames, which is the clip
+length that the generation stage of \cref{sec:3.3_generation} consumes.
+
+\noindent\textbf{Body parts for the motion evidence.}
+$\mathcal{B}$ contains the seven SMPL-X joints listed in
+\cref{tab:supp_body_parts}.  The set is deliberately small: over $278$ segments
+with clean tracking, every joint we exclude follows one of these seven with a
+Pearson correlation of at least $0.93$ (neck with shoulder $0.98$, elbow with
+its own hand $0.95$, the two knees $0.96$), so adding them would repeat lines of
+the prompt rather than add information.  The two hands are kept apart because
+they are the one genuinely independent pair ($r=0.63$), as one hand acts while
+the other rests.  Hips are kept despite following the chest at $r=0.96$, since a
+sizable part of our data is furniture that is sat on, and \textit{hips} is the
+word that puts the captioner there.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+Reported part & SMPL-X joint index \\
+\midrule
+Head        & 15 \\
+Chest       & 6 \\
+Hips        & 0 \\
+Left hand   & 20 \\
+Right hand  & 21 \\
+Left foot   & 10 \\
+Right foot  & 11 \\
+\bottomrule
+\end{tabular}
+\caption{The body parts $\mathcal{B}$ whose distance change to the object is
+reported to the captioner, and the SMPL-X joints they are measured at.}
+\label{tab:supp_body_parts}
+\end{table}
+
+\noindent\textbf{Verbalizing the distance change.}
+Each $\Delta_{k,j}$ of \cref{eq:part_proximity} becomes one of three words:
+\textit{unchanged} when $|\Delta_{k,j}|<\tau$ with $\tau=10$\,cm,
+\textit{moves closer} when $\Delta_{k,j}\le-\tau$, and \textit{moves away}
+otherwise.  On the segments above, this band leaves $27\%$ of the readings
+\textit{unchanged}, which keeps that verdict meaningful without swallowing real
+approach and retreat.  Only the first and the last frame of a segment are
+compared, which the prompt states explicitly, so a part that drifts away and
+comes back still reads as having moved closer.  The resulting block, which is
+substituted verbatim into \cref{fig:supp_prompt_segment}, reads
+
+\begin{quote}\small\begin{verbatim}
+Measured change in the object's 3D distance to
+each body part, first frame of this segment vs
+last:
+- Head: moves closer
+- Chest: moves closer
+- Hips: unchanged
+- Left hand: unchanged
+- Right hand: moves closer
+- Left foot: moves away
+- Right foot: moves away
+\end{verbatim}
+\end{quote}
+
+\noindent\textbf{Withholding the evidence.}
+A single frame at which the tracker has lost the object corrupts every distance
+measured across the window that contains it, so we test the raw, unsmoothed
+object pose for abrupt steps between adjacent frames and emit an empty evidence
+block for any segment that contains one.  A step is abrupt when the translation
+moves by more than $50$\,cm in one frame, or when the rotation turns by more than
+$90^\circ$ in one frame; both frames spanning the step are marked.  The
+rotation test is applied only to sequences whose median per-frame turn is below
+$5^\circ$, that is, only where the tracker resolves rotation at all: on round or
+thin objects it does not, and such sequences show a median turn near $14^\circ$
+with a fifth of frames beyond $150^\circ$, which is an unresolved rotation
+rather than a spinning object.  Both bars are loose by design, as they exist to
+catch tracking failure and not to judge fast motion.  Scaling them to each
+sequence's own median step was tried and is worse, because a sequence whose
+tracking fails throughout raises its own bar and passes.
+
+\noindent\textbf{Per-segment captioning.}
+Every segment produced by the recursion above is captioned independently with
+Qwen3-VL-8B-Instruct~\cite{bai2025qwen3}.  We sample up to $5$ frames uniformly
+from the segment, resize them so that the longer side is $224$ pixels, annotate
+each with its timestamp, and prepend the system line \textit{``You are a precise
+video annotator for hand-object interaction segments.''} to the prompt of
+\cref{fig:supp_prompt_segment}.  Decoding is greedy with at most $128$ new
+tokens.  The prompt forbids the words \textit{and} and \textit{then} so that one
+caption names one action; when a caption still contains them, we keep its longest
+clause.
+
+\begin{figure*}[t]
+\centering
+\small
+\begin{verbatim}
+Analyze these ordered, uniformly sampled frames from one segment of a monocular human-object
+interaction video.
+
+The interacted object is {object_name}.
+The segment covers {full_start:.2f}s to {full_end:.2f}s in the full video ({duration:.2f} seconds
+long). You are given {sample_count} uniformly sampled frames from it.
+{motion_hint}
+
+Task:
+- Write exactly one short English caption describing the dominant human-object interaction across
+  these frames.
+- Refer to the object as "{object_name}".
+- Prefer a motion or state change over a static appearance description.
+- Express exactly one action; do not use the words "and" or "then".
+- Do not include timestamp phrases, frame numbers, or generic text like "the interaction continues".
+
+Examples (format and range of detail only; do not copy these actions):
+- {"caption": "A person holds the {object_name} against the chest."}
+- {"caption": "A person lifts the {object_name} with one hand."}
+- {"caption": "A person sets the {object_name} down."}
+- {"caption": "A person rotates the {object_name} slowly while gripping it near one end with the
+   right hand."}
+- {"caption": "A person pushes the {object_name} away from the body across the surface with an open
+   palm."}
+- {"caption": "A person lowers the {object_name} onto the surface with the right hand, steadying it
+   with the left."}
+
+Output Format:
+{"caption": str}
+\end{verbatim}
+\caption{Per-segment captioning prompt.  \texttt{\{motion\_hint\}} is the
+measured-motion block described in \cref{sec:supp_decomposition}, and is empty
+whenever the tracked pose may not be quoted.  \texttt{\{object\_name\}} is the
+object category of the clip.}
+\label{fig:supp_prompt_segment}
+\end{figure*}
+
+\noindent\textbf{Temporal grounding.}
+Each caption is grounded independently against the whole clip with
+TimeLens-7B~\cite{zeng2025timelens}, using the query
+
+\begin{quote}\small\begin{verbatim}
+Please find the visual event described by the
+sentence '{caption}', determining its starting
+and ending times. The format should be: 'The
+event happens in <start time> - <end time>
+seconds'.
+\end{verbatim}
+\end{quote}
+
+\noindent
+The video is sampled at $6$\,fps with a visual-token budget of $3584$ tokens,
+decoding is greedy with at most $128$ new tokens, and the returned interval is
+clamped to the clip and ordered.  Two consecutive grounded intervals are merged
+when their temporal intersection over union reaches $0.9$, which collapses only
+near-duplicate groundings and leaves a contained short event as its own segment.
+From the merged result we keep the start times only, pin the first one to frame
+$0$, and let each sub-action end one frame before the next one starts, so the
+final sub-actions form a contiguous partition of the clip with no gap or
+overlap.
+
+\noindent\textbf{Joint re-captioning.}
+The per-segment captions are written without knowledge of one another, so
+adjacent segments can receive the same sentence.  We therefore re-caption the
+grounded timeline in a single pass with the prompt of
+\cref{fig:supp_prompt_merge}, which sees up to $32$ frames sampled at $2$\,fps
+over the full clip together with all preliminary captions and their intervals,
+and which is required to give every segment a distinct description.  Decoding is
+greedy with at most $1536$ new tokens, since the answer is a JSON array over the
+whole clip; a reply that does not parse is retried up to three times with an
+explicit reminder of the schema, and a truncated reply falls back to the
+segments that were emitted completely.  The number of sub-actions is left to the
+model unless a target count is supplied, in which case the prompt requests that
+count and the grounding merge above is given the same budget.
+
+\begin{figure*}[t]
+\centering
+\small
+\begin{verbatim}
+Analyze this merged monocular human-object interaction video segment.
+
+The interacted object is {object_name}. The full clip is {duration:.2f} seconds long.
+
+Preliminary segment results are included below.
+They are useful evidence for short actions that may be hard to see in sparse samples, but their
+boundaries can be imperfect.
+
+Preliminary segments:
+{source_captions}
+
+Task:
+- {subaction_count_instruction}
+- Segment the complete clip in chronological order, using the frames and preliminary captions
+  together.
+- Express exactly one action in each caption; do not use the words "and" or "then".
+- Every segment must have a distinct caption describing its own visible action or state change;
+  never repeat, paraphrase, or reuse the same action description across segments.
+- If adjacent segments appear similar, identify the most specific visible difference between them
+  instead of assigning the same caption.
+
+Examples:
+- {"subactions": [
+  {"caption": "A person turns toward the chair.", "start": 0.0, "end": 0.7},
+  {"caption": "A person lowers the body toward the chair seat.", "start": 0.7, "end": 1.6},
+  {"caption": "A person settles onto the chair with both feet on the floor.", "start": 1.6,
+   "end": 2.5}
+]}
+
+Output Format:
+{"subactions": [{"caption": str, "start": float, "end": float}]}
+\end{verbatim}
+\caption{Joint re-captioning prompt, abbreviated to one of its three
+in-context examples.  \texttt{\{source\_captions\}} lists every preliminary
+caption with its grounded interval, and
+\texttt{\{subaction\_count\_instruction\}} either requests a given number of
+segments or asks for the visually supported number.}
+\label{fig:supp_prompt_merge}
+\end{figure*}
+
+\noindent\textbf{Sub-action length.}
+The boundaries so far follow the interaction, not the generator, so we finally
+constrain their spacing.  While any sub-action is shorter than $30$ frames, we
+remove the boundary of the shortest one, merging it into the neighbor it was
+split from; the boundary at frame $0$ is never removed.  We then split every
+sub-action longer than $150$ frames into $\lceil L/150 \rceil$ pieces of equal
+length that inherit its caption.  The lower bound keeps a sub-action long enough
+for an action to be visible and for grounding to be meaningful, and the upper
+bound keeps it within the horizon that the generation stage handles in one pass.
+Both bounds are enforced on frames rather than seconds, since the generator
+consumes a fixed number of frames.
+
+\noindent\textbf{Contact captioning.}
+For each final sub-action, we sample $5$ frames uniformly and query the same
+vision-language model with the prompt of \cref{fig:supp_prompt_contact}, which
+restricts the answer to a closed vocabulary of $18$ body parts.  We parse the
+returned JSON, keep only the names that appear in the vocabulary, and map each
+name to a group of SMPL-X body-part vertex segments, \textit{e.g.}, \textit{left
+hand} to \texttt{leftHand} and \texttt{leftHandIndex1}, \textit{torso} to
+\texttt{spine}, \texttt{spine1}, and \texttt{spine2}, and \textit{right knee} to
+\texttt{rightUpLeg} and \texttt{rightLeg}.  The union of these vertices defines
+$\mathbf{c}_t\in\{0,1\}^{V}$ over the $V$ SMPL-X vertices, constant within a
+sub-action and zero wherever the model reports no visible contact.  Because the
+label is derived from the same temporally grounded description that drives
+generation, the supervised contact follows the interaction as it changes over
+time, which a dense contact map regressed per frame from appearance does not
+guarantee.
+
+\begin{figure}[t]
+\centering
+\small
+\begin{verbatim}
+Analyze these ordered, uniformly sampled images
+from one human-object interaction video chunk.
+
+The interacted object is {object_name}.
+
+Task:
+- Identify the body parts that are in direct
+  physical contact with the {object_name}
+  during this chunk.
+- Choose only from this pre-defined list;
+  multiple parts are allowed: {parts}
+- Focus only on the person whose body center is
+  closest to the image center.
+- "left" and "right" are the person's anatomical
+  sides, not the viewer's sides.
+- Include a part only when direct physical
+  contact is visible. If no clear contact is
+  visible, return an empty list.
+
+Examples:
+- {"contact_parts": ["right hand"]}
+- {"contact_parts": ["right arm", "right elbow"]}
+- {"contact_parts": ["left foot"]}
+- {"contact_parts": ["left thigh", "right thigh"]}
+
+Return JSON only, using this exact shape and
+replacing "part name" with entries from the
+allowed list: {"contact_parts": ["part name"]}
+For no visible contact, return:
+{"contact_parts": []}
+\end{verbatim}
+\caption{Contact captioning prompt.  \texttt{\{parts\}} is the closed
+vocabulary of $18$ body parts: head, neck, torso, hips, left/right shoulder,
+left/right arm, left/right elbow, left/right hand, left/right thigh, left/right
+knee, and left/right foot.}
+\label{fig:supp_prompt_contact}
+\end{figure}
+
+\noindent\textbf{Hyperparameters.}
+\cref{tab:supp_decomposition_hparams} collects every constant of this stage.
+All of them are shared across datasets; none is tuned per sequence.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+Smoothing window $w$ & 5 frames \\
+Boundary residual threshold $\epsilon$ & 0.1\,m \\
+Minimum split gap $g$ & 15 frames \\
+Distance tolerance $\tau$ & 10\,cm \\
+Abrupt translation step & 50\,cm / frame \\
+Abrupt rotation step & $90^\circ$ / frame \\
+Rotation-resolved median turn & $5^\circ$ / frame \\
+Minimum sub-action length & 30 frames \\
+Maximum sub-action length & 150 frames \\
+\midrule
+Frames per segment caption & 5 @ 224\,px \\
+Frames for joint re-captioning & $\le32$ @ 2\,fps \\
+Frames per contact query & 5 \\
+Grounding frame rate & 6\,fps \\
+Grounding token budget & 3584 \\
+Grounding merge IoU & 0.9 \\
+\bottomrule
+\end{tabular}
+\caption{Hyperparameters of video decomposition.}
+\label{tab:supp_decomposition_hparams}
+\end{table}
+
+\subsection{Details of Gaussian re-rendering}
+\label{sec:supp_rerendering}
+
+\noindent\textbf{Novel-view rendering.}
+The four orbit cameras are placed by rotating the input camera about the
+subject's vertical axis by $\{-60^{\circ},-30^{\circ},+30^{\circ},+60^{\circ}\}$,
+orbiting the point at the estimated subject depth, and all views are rendered on
+a fixed $480\times832$ portrait canvas so that every view and every sequence
+share one output geometry.
+The Gaussians are posed by the \emph{initial} motion, before any optimization,
+so this stage depends only on \cref{sec:3.2_decomposition}.
+
+\noindent\textbf{Restoration.}
+We use Wan~2.1~\cite{wan2025wan} at $480$p with its control branch driven by a
+DWPose~\cite{yang2023effective} skeleton extracted from the rendering itself.
+The restoration is a partial denoising pass at strength $0.7$ with $7$ steps
+under an SDE sampler, and the guidance weight over the rendered foreground is
+$\lambda=0.05$; the foreground mask is read from the render's own non-background
+pixels rather than re-segmented, since we rasterized it and its alpha is already
+exact and temporally consistent.
+Clips longer than the model's trained length of $81$ frames are denoised in a
+single pass with the transformer tiled over time, seeing $21$ latent frames at a
+stride of $15$, with the overlaps crossfaded \emph{inside} every denoising step
+so that latents mix across seams.
+
+\noindent\textbf{Sub-action chunking.}
+Passes are cut on the boundaries $\{(s_k,e_k)\}$ of \cref{sec:3.2_decomposition}.
+A segment shorter than $33$ frames is far out of the model's distribution and is
+merged into its predecessor, with the absorbed caption appended to the prompt so
+that a merged pass still describes both sub-actions.
+Adjacent segments share $16$ frames, split evenly on either side of the
+boundary, and are joined with a cosine crossfade.
+The appearance reference for segment $k$ is the frame at $s_k$ of the real input
+video, masked by the human and object silhouettes; a single reference for the
+whole clip would keep showing the subject's pose and occlusions at frame $0$
+long after it has turned.
+
+\subsection{Details of 4D HOI optimization}
+\label{sec:supp_optimization}
+
+We optimize for $25$ steps with Adam ($\beta=(0.9,0.999)$) at learning rates
+$10^{-3}$ for the human pose, $10^{-4}$ for the human shape, and $5\times10^{-2}$
+for the object rotation and translation.
+The motion is parameterized by a cubic B-spline with one coefficient every $9$
+frames.
+Each step samples $4$ temporal windows of $16$ consecutive frames, drawn so that
+window anchors at the sequence edges are visited first and every frame anchors a
+window exactly once per epoch; the per-frame losses are then divided by the
+number of windows covering that frame.
+$\mathcal{L}_{\text{cent}}$ is applied for the first $10$ steps and disabled
+afterwards, and the contact threshold is $\tau=1.0$.
+Rendering during optimization is performed at half the input resolution.

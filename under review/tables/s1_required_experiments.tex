@@ -1,0 +1,27 @@
+\begin{table*}[t]
+\def\arraystretch{1.3}
+\renewcommand{\tabcolsep}{1.0mm}
+\footnotesize
+\begin{center}
+\resizebox{\linewidth}{!}{
+    \begin{tabular}{>{\raggedright\arraybackslash}m{4.2cm}|>{\raggedright\arraybackslash}m{5.0cm}|>{\centering\arraybackslash}m{2.2cm}|>{\raggedright\arraybackslash}m{3.8cm}}
+    \specialrule{.1em}{.05em}{0.0em}
+        Required item & Purpose & Status & Notes \\
+        \hline
+        Stage 2 per-round metric curve & Verify non-collapse from round 1 to later rounds & \TBD & Fill \cref{tab:round_noncollapse}. \\
+        Confidence weighting ablation & Show generated-view provenance is necessary & \TBD & Fill \cref{tab:confidence_ablation}. \\
+        Disoccluded-region caption ablation & Validate semantic chunking where text matters most & \TBD & Fill \cref{tab:disocclusion_caption}. \\
+        Chunk-boundary ablation & Separate semantic outer boundaries from fixed inner windows & \TBD & Fill \cref{tab:chunking_ablation}. \\
+        SOTA comparison & Establish final reconstruction quality & \TBD & Fill \cref{tab:sota_comparison}. \\
+        Runtime / view-range study & Support the fine-tuning-free expansion claim & \TBD & Fill \cref{tab:angular_runtime}. \\
+        \specialrule{.1em}{-0.05em}{-0.05em}
+    \end{tabular}
+}
+\end{center}
+\vspace*{-1.3em}
+\caption{
+\textbf{Submission checklist for the AAAI draft.}
+This table is not intended for the final main paper unless converted into a concise supplementary status table.
+}
+\label{tab:suppl_required_experiments}
+\end{table*}

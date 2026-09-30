@@ -117,14 +117,60 @@ body {
 .results-carousel .item {
   margin: 5px;
   overflow: hidden;
-  border: 1px solid #bbb;
+  border: 1px solid #d0d2d4;
   border-radius: 10px;
   padding: 0;
   font-size: 0;
 }
 
 .results-carousel video {
+  display: block;
   margin: 0;
+}
+
+#decomposition-carousel .item,
+#rerendering-carousel .item {
+  aspect-ratio: 5 / 4;
+}
+
+#decomposition-carousel video,
+#rerendering-carousel video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.task-results-row > .column {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.task-results-row > .column:first-child {
+  padding-right: 24px;
+}
+
+.task-results-row > .column:last-child {
+  padding-left: 24px;
+}
+
+.task-results-row .results-carousel .item {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (min-width: 769px) {
+  .teaser-wide-row {
+    width: calc(120% + 1.8rem);
+    margin-left: calc(-10% - 0.9rem);
+    margin-right: calc(-10% - 0.9rem);
+  }
+
+  .wide-media-row {
+    width: calc(130% + 1.95rem);
+    margin-left: calc(-15% - 0.975rem);
+    margin-right: calc(-15% - 0.975rem);
+  }
 }
 
 
@@ -158,11 +204,15 @@ body {
 
 
 /* Custom style */
+.publication-title {
+  font-size: 2.5rem !important;
+}
+
 .inline-title-icon {
   height: 1.4em;
   width: auto;
   vertical-align: middle;
-  margin-right: -12px;
+  margin-right: 0.042em;
   margin-top: -0.3em;
   margin-left: -0.5em;
 }
@@ -180,4 +230,93 @@ body {
 
 .slider-pagination {
   display: none !important;
+}
+
+@media (max-width: 768px) {
+  .publication-title {
+    font-size: 2rem !important;
+  }
+}
+
+/* HORIA carousel presentation overrides.
+   Remove this block to restore the original card and arrow styling. */
+.results-carousel .item {
+  position: relative;
+  padding: 1px;
+  background: #fff;
+  border: 0;
+  border-radius: 0;
+}
+
+.results-carousel .item::after {
+  position: absolute;
+  z-index: 10;
+  inset: 1px 4px 1px 1px;
+  pointer-events: none;
+  content: "";
+  box-shadow: inset 0 0 0 1px #d0d2d4;
+}
+
+.results-carousel .slider-navigation-previous,
+.results-carousel .slider-navigation-next {
+  width: 36px;
+  height: 36px;
+  margin-top: -18px;
+  color: #8a96a3;
+  background-color: #fff !important;
+  background-image: none !important;
+  border: 1px solid #d8dee7;
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(4px);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease,
+              transform 0.2s ease;
+}
+
+.results-carousel .slider-navigation-previous {
+  left: 12px;
+}
+
+.results-carousel .slider-navigation-next {
+  right: 12px;
+}
+
+.results-carousel .slider-navigation-previous:hover,
+.results-carousel .slider-navigation-next:hover {
+  color: #5e81ac;
+  background: #f7fafc;
+  border-color: #a9bfd5;
+  box-shadow: 0 6px 18px rgba(94, 129, 172, 0.18);
+  transform: scale(1.06);
+}
+
+.results-carousel .slider-navigation-previous svg,
+.results-carousel .slider-navigation-next svg {
+  width: 9px;
+}
+
+#rerendering-carousel .item {
+  padding: 4px 18px;
+  background: #fff;
+}
+
+#rerendering-carousel .item::after {
+  background: none;
+  box-shadow: inset 0 0 0 1px #d0d2d4;
+}
+
+#rerendering-carousel video {
+  height: 100%;
+  margin-bottom: 0;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  object-fit: contain;
+  object-position: center;
+}
+
+#results-carousel-1 .item,
+#results-carousel-2 .item {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }

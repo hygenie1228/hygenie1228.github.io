@@ -1,0 +1,11 @@
+\begin{abstract}
+Joint 4D reconstruction of a human and object from a monocular video is essential for understanding how people interact with their environment.
+While recent methods have made noticeable progress, capturing such human-object interactions remains difficult due to two main challenges.
+First, a video typically contains composite semantic context that spans multiple sub-actions, making it difficult to capture which interaction state applies at each moment.
+Second, a single-view observation of the input video cannot sufficiently resolve human-object occlusion, resulting in geometrically inconsistent reconstructions.
+To address these challenges, we introduce \textit{\textbf{\ourmethod}}, which is built upon two core designs.
+First, we decompose the entire input video into temporally grounded and semantically distinct sub-actions, obtaining specific text descriptions for each interaction phase through motion-aware video captioning.
+Second, conditioned on these semantic descriptions, we propose an interaction-aware re-rendering pipeline to compensate for limited single-view cues from the input video.
+Specifically, we render the initially reconstructed 4D human and object from novel viewpoints and refine the renderings into plausible interaction videos using a video diffusion prior guided by the text descriptions.
+As a result, our framework produces accurate and temporally coherent 4D reconstructions under diverse interaction scenarios, achieving state-of-the-art performance.
+\end{abstract}

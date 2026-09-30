@@ -1,0 +1,90 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\renewcommand{\tabcolsep}{1.0mm}
+\def\arraystretch{1.55} % 양쪽 표 모두 동일한 행간 적용
+
+% ==================== Table 1: Decomposition (5행) ====================
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\caption{
+\textbf{Effect of video decomposition.}
+}
+\label{tab:abl_decomposition}
+
+\vspace{+0.5em}
+\scalebox{0.55}{
+\begin{tabular}{
+>{\centering\arraybackslash}m{2.6cm}
+>{\centering\arraybackslash}m{2.1cm}|
+>{\centering\arraybackslash}m{0.9cm}
+>{\centering\arraybackslash}m{0.9cm}
+>{\centering\arraybackslash}m{1.1cm}
+>{\centering\arraybackslash}m{1.2cm}
+>{\centering\arraybackslash}m{1.1cm}
+>{\centering\arraybackslash}m{1.1cm}
+}
+\specialrule{.1em}{.05em}{0.0em}
+
+Caption
+& Decomposition
+& CD$_{\text{H}}{\downarrow}$
+& CD$_{\text{O}}{\downarrow}$
+& Contact${\uparrow}$
+& Collision${\downarrow}$ 
+& Accel$_{\text{H}}{\downarrow}$
+& Accel$_{\text{O}}{\downarrow}$\\
+\hline
+
+\xmark      & \xmark    & 5.723 & 54.505 & 0.349 & 0.072 & 0.307 & 3.468 \\
+Standard    & \xmark    & 5.500 & 51.155 & 0.391 & 0.059 & 0.291 & 3.129 \\
+\textbf{Motion-aware}   & \xmark & 5.511 & 42.102 & 0.408 & 0.060 & 0.294 & 3.210 \\
+\textbf{Motion-aware}   & Uniform & 5.404 & 37.121 & 0.469 & \textbf{0.056} & 0.298 & 2.986 \\
+\makebox[0pt][c]{\textbf{\;\;\;\;Motion-aware\;\;(Ours)}} & \makebox[0pt][c]{\textbf{Grounded}} & \textbf{5.385} & \textbf{34.894} & \textbf{0.520} & \textbf{0.056} & \textbf{0.273} & \textbf{1.571}\\
+
+\specialrule{.1em}{-0.05em}{-0.05em}
+\end{tabular}
+}
+\end{minipage}
+\hspace{0.03\textwidth}%
+% ==================== Table 2: Re-rendering (4행) ====================
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\caption{
+\textbf{Effect of re-rendering.}
+}
+\label{tab:abl_rerendering}
+
+\vspace{+0.5em}
+\scalebox{0.55}{
+\begin{tabular}{
+>{\centering\arraybackslash}m{1.8cm}
+>{\centering\arraybackslash}m{2.2cm}|
+>{\centering\arraybackslash}m{0.9cm}
+>{\centering\arraybackslash}m{0.9cm}
+>{\centering\arraybackslash}m{1.1cm}
+>{\centering\arraybackslash}m{1.2cm}
+>{\centering\arraybackslash}m{1.1cm}
+>{\centering\arraybackslash}m{1.1cm}
+}
+\specialrule{.1em}{.05em}{0.0em}
+
+Re-rendering
+& Regional cond.
+& CD$_{\text{H}}{\downarrow}$
+& CD$_{\text{O}}{\downarrow}$
+& Contact${\uparrow}$
+& Collision${\downarrow}$ 
+& Accel$_{\text{H}}{\downarrow}$
+& Accel$_{\text{O}}{\downarrow}$\\
+\hline
+\xmark   & \xmark       & -- & -- & -- & -- & -- \\
+\cmark   & \xmark       & -- & -- & -- & -- & -- \\
+\textbf{\cmark\makebox[0pt][l]{\;\;\;\;\;(Ours)}} & \cmark & \textbf{5.385} & \textbf{34.894} & \textbf{0.520} & \textbf{0.056} & \textbf{0.273} & \textbf{1.571}\\
+ 
+\specialrule{.1em}{-0.05em}{-0.05em}
+\end{tabular}
+}
+\end{minipage}
+
+\end{table}

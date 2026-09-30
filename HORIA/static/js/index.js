@@ -34,22 +34,24 @@ $(document).ready(function() {
       slidesToScroll: 1,
       loop: true,
       autoplay: true,
-      autoplaySpeed: 8000,
-      delay: 8000
+      autoplaySpeed: 15000,
+      delay: 15000
     });
 
     bulmaCarousel.attach('.carousel-2', {
       slidesToShow: 2,
       slidesToScroll: 1,
       loop: true,
-      autoplay: true
+      autoplay: true,
+      autoplaySpeed: 15000
     });
 
     bulmaCarousel.attach('.carousel-3', {
       slidesToShow: 3,
       slidesToScroll: 1,
       loop: true,
-      autoplay: true
+      autoplay: true,
+      autoplaySpeed: 15000
     });
 
     // Access to bulmaCarousel instance of an element
