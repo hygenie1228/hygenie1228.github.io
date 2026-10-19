@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="HORIA: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation">
-  <meta name="keywords" content="HORIA, 4D human-object interaction, monocular video, novel-view video generation">
+        content="HORIA reconstructs 4D humans and objects from a monocular video using motion-aware captioning and interaction-aware re-rendering.">
+  <meta name="keywords" content="HORIA">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HORIA: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation</title>
+  <title>HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering</title>
 
   <!-- 🟡 Open Graph (OG) -->
-  <meta property="og:title" content="HORIA" />
-  <meta property="og:description" content="HORIA reconstructs 4D human-object interactions from a monocular video using temporally grounded novel-view video generation." />
+  <meta property="og:title" content="HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering" />
+  <meta property="og:description" content="HORIA reconstructs 4D humans and objects from a monocular video using motion-aware captioning and interaction-aware re-rendering." />
   <meta property="og:image" content="https://hygenie1228.github.io/HORIA/static/images/thumbnail.png" />
   <meta property="og:url" content="https://hygenie1228.github.io/HORIA/" />
   <meta property="og:type" content="website" />
 
   <!-- X site -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HORIA" />
-  <meta name="twitter:description" content="HORIA reconstructs 4D human-object interactions from a monocular video using temporally grounded novel-view video generation." />
+  <meta name="twitter:title" content="HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering" />
+  <meta name="twitter:description" content="HORIA reconstructs 4D humans and objects from a monocular video using motion-aware captioning and interaction-aware re-rendering." />
   <meta name="twitter:image" content="https://hygenie1228.github.io/HORIA/static/images/thumbnail.png" />
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
@@ -31,6 +31,7 @@
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="stylesheet" href="./static/css/twentytwenty.css">
   <link rel="icon" href="./static/images/favicon.png">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -38,6 +39,8 @@
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/jquery-3.2.1.min.js"></script>
+  <script src="./static/js/jquery.event.move.js"></script>
+  <script src="./static/js/jquery.twentytwenty.js"></script>
   <script src="./static/js/index.js"></script>
 </head>
 <body>
@@ -49,8 +52,7 @@
         <div class="column has-text-centered">
           <h1 class="title is-1 publication-title">
             <img src="./static/images/favicon.png" class="inline-title-icon" alt="HORIA Icon">
-            <span class="horia-gradient">HORIA</span>: 4D Human-Object Reconstruction<br>
-            via Temporally Grounded Novel-View Video Generation
+            <span class="horia-gradient">HORIA</span>: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering
           </h1>
           <div class="is-size-4 publication-authors">
             <span class="author-block">
@@ -66,6 +68,7 @@
 
           <div class="is-size-4 publication-authors">
             <span class="author-block">Seoul National University </br>
+            <!-- <span class="author-block" style="margin-top: 10;"> <b>VENUE 20XX</b></span> </br> -->
             <img style="width:25%; padding-top: 10px;" src="./static/images/logo_cvlab.png">
           </div>
 
@@ -84,6 +87,7 @@
               <!-- PDF Link. -->
               <span class="link-block">
                 <a href="./static/HORIA.pdf"
+                   target="_blank" rel="noopener"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fas fa-file-pdf"></i>
@@ -93,7 +97,7 @@
               </span>
               <!-- Video Link. -->
               <span class="link-block">
-                <a href="https://www.youtube.com/watch?v=jNtbY6Z3urY"
+                <a href="#"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fab fa-youtube"></i>
@@ -115,8 +119,8 @@
           </div>
         </div>
       </div>
-      <div class="columns is-centered teaser-wide-row">
-        <div class="column is-full" style="max-width: 1400px; margin-top: 1rem; padding: 5px;">
+      <div class="columns is-centered">
+        <div class="column is-full" style="max-width: 1200px; margin-top: 1rem; padding: 5px;">
           <div class="content">
             <video id="teaser-video" autoplay muted loop playsinline preload="metadata" width="100%">
               <source src="./static/videos/teaser.mp4" type="video/mp4">
@@ -124,9 +128,9 @@
           </div>
         </div>
       </div>
-      <div class="columns is-centered has-text-centered teaser-wide-row">
-        <h2 class="subtitle" style="width:100%; margin-top:0.5rem; margin-bottom:3rem; font-size: 1.1rem;">
-            <b>TL;DR.</b> Given a monocular video, <b>HORIA</b> reconstructs temporally coherent 4D human-object interactions by decomposing the video into grounded sub-actions and generating interaction-aware novel-view supervision.
+      <div class="columns is-centered has-text-centered">
+        <h2 class="subtitle" style="width:80%; margin-top:0.5rem; margin-bottom:3rem; font-size: 1.1rem;">
+            <b>TL;DR.</b> HORIA reconstructs 4D humans and objects from a monocular video by decomposing interactions into phases with <b>motion-aware captioning</b> and refining novel-view videos through <b>interaction-aware re-rendering</b>.
         </h2>
       </div>
     </div>
@@ -141,15 +145,16 @@
         <div class="content has-text-justified">
           <p>
             Joint 4D reconstruction of a human and object from a monocular video is essential for understanding how people interact with their environment.
-            Despite recent progress, this task remains challenging for two main reasons.
-            First, an interaction video often contains multiple sub-actions, making it difficult for a single global description to identify the interaction state at each moment.
-            Second, severe human-object occlusion in a single-view video provides insufficient geometric evidence and often leads to inconsistent reconstructions.
+            While recent methods have made noticeable progress, capturing such human-object interactions remains difficult due to two main challenges.
+            First, a video typically contains composite semantic context spanning multiple interaction phases, making it difficult to track the temporal changes of the interaction in the reconstruction.
+            Second, under human-object occlusion, a single-view observation contains incomplete visual information about the interaction, resulting in geometrically inconsistent reconstructions.
           </p>
           <p>
-            To address these challenges, we introduce <b>HORIA</b>, a framework built upon two core designs.
-            First, motion-aware video captioning decomposes the input into temporally grounded, semantically distinct sub-actions and assigns a specific text description to each interaction phase.
-            Second, an interaction-aware re-rendering pipeline renders the initial 4D human and object from novel viewpoints and refines those renderings with a text-guided video diffusion prior.
-            The resulting novel-view videos provide auxiliary supervision that enables accurate, geometrically consistent, and temporally coherent 4D reconstruction across diverse interaction scenarios.
+            To address these challenges, we introduce <b>HORIA</b>, built upon two core designs.
+            First, we decompose the entire input video into temporally grounded and semantically distinct interaction phases with motion-aware captioning, obtaining a specific text description for each phase.
+            Second, conditioned on these text descriptions of the interaction, we propose an interaction-aware re-rendering that compensates for the limited single-view observation.
+            Specifically, we render the initially reconstructed 4D human and object from novel viewpoints and refine the renderings with a text-to-video diffusion prior, which provides auxiliary novel-view supervision beyond single-view cues.
+            As a result, our framework produces temporally coherent and accurate 4D reconstructions under diverse interaction scenarios, achieving state-of-the-art performance.
           </p>
         </div>
       </div>
@@ -163,12 +168,14 @@
   <div class="container is-max-desktop">
     <div class="column has-text-centered" style="padding-top: 0px;">
       <h2 class="title is-4">Interactive demo</h2>
+      <div class="content has-text-justified" style="margin-bottom: 1.5rem;">
+        Drag to sweep the camera around the reconstruction, and switch between the
+        Gaussian and mesh renderings. Everything below is rendered from a single
+        input video.
+      </div>
       <div class="horia-demo">
         <iframe src="./static/demo/index.html" title="HORIA interactive demo"
                 loading="lazy" allow="autoplay; fullscreen"></iframe>
-      </div>
-      <div class="content has-text-centered" style="margin-top: 1rem; font-size: 1rem; font-weight: 700;">
-        Choose an example and explore our reconstruction results across various viewpoints!
       </div>
     </div>
   </div>
@@ -188,92 +195,197 @@
 
 
 <section class="section">
+  <!-- Intro video : 유튜브 영상이 준비되면 아래 주석을 해제하고 VIDEO_ID를 교체하세요 -->
+  <!--
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered" style="padding-top: 0px;">
+      <div class="publication-video" style="width: 80%; display: inline-block;">
+        <iframe src="https://www.youtube.com/embed/VIDEO_ID" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+  -->
+  <!-- Intro video -->
+
   <div class="container is-max-desktop">
     <!-- Introducing HORIA -->
     <div class="column has-text-centered" style="padding-top: 0px; padding-bottom: 3.0rem;">
-      <h2 class="title is-4">Pipeline Details</h2>
+      <h2 class="title is-4">Interaction-aware re-rendering for 4D reconstruction</h2>
       <div class="content has-text-justified">
-          <img src="./static/images/pipeline.jpeg" alt="Algorithm description of HORIA" width="100%">
+          <img src="./static/images/pipeline.jpg" alt="Algorithm description of HORIA" width="100%">
       </div>
       <div class="content has-text-justified">
-          Given a monocular interaction video, <b>HORIA</b> first estimates the human and object motion and decomposes the sequence into temporally grounded sub-actions with motion-aware captions.
-          For each sub-action, it renders the initial 4D reconstruction from novel viewpoints and refines the videos using semantic and contact-aware text guidance.
-          These refined multi-view observations supervise a joint optimization of the human and object, improving spatial accuracy and temporal consistency under severe occlusion.
+          <b>HORIA</b> first decomposes the input video into temporally grounded interaction phases using motion-aware captioning, assigning a specific text description to each phase.
+          These descriptions guide a text-to-video diffusion prior to refine novel-view renderings of the initially reconstructed human and object, providing auxiliary supervision for regions occluded in the input view.
+          The refined videos are aggregated into a signed distance field (SDF) that provides geometric consensus across viewpoints and guides the final 4D human and object optimization.
       </div>
     </div>
     <!-- Introducing HORIA -->
 
-    <!-- Task-specific results -->
-    <div class="columns is-centered task-results-row wide-media-row" style="padding-bottom: 1.5rem;">
-      <div class="column is-6 has-text-centered">
-        <h2 class="title is-4">Video Decomposition</h2>
-        <div id="decomposition-carousel" class="carousel-1 results-carousel">
-          <div class="item">
-            <video id="captioning-1" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/captioning_1.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="captioning-2" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/captioning_2.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="captioning-3" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/captioning_3.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="captioning-4" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/captioning_4.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="captioning-5" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/captioning_5.mp4" type="video/mp4">
-            </video>
-          </div>
+    <!-- Qualitative results-->
+    <div class="column has-text-centered" style="padding-bottom: 3.0rem;">
+      <h2 class="title is-4">Qualitative results</h2>
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_1.png" alt="Input #1" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
         </div>
-        <div class="content has-text-justified" style="padding-top: 15px;">
-          HORIA tracks changes in the initial object motion to identify coarse interaction boundaries, then uses motion-aware captioning and temporal grounding to divide the video into semantically distinct sub-actions with precise time spans.
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_1a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_1a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_1b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_1b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
+        </div>
+
+        <div class="column is-3">
+          <img src="./static/images/sample_2.png" alt="Input #2" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_2a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_2a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_2b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_2b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
         </div>
       </div>
 
-      <div class="column is-6 has-text-centered">
-        <h2 class="title is-4">Interaction-Aware Re-Rendering</h2>
-        <div id="rerendering-carousel" class="carousel-1 results-carousel">
-          <div class="item">
-            <video id="rerendering-1" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/rerendering_1.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="rerendering-2" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/rerendering_2.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="rerendering-3" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/rerendering_3.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="rerendering-4" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/rerendering_4.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="item">
-            <video id="rerendering-5" autoplay muted loop playsinline height="100%">
-              <source src="./static/videos/rerendering_5.mp4" type="video/mp4">
-            </video>
-          </div>
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_3.png" alt="Input #3" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
         </div>
-        <div class="content has-text-justified" style="padding-top: 15px;">
-          HORIA renders the initial human-object reconstruction from novel viewpoints and refines each video with a text-to-video diffusion prior and region-specific prompts, providing reliable multi-view supervision for 4D optimization.
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_3a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_3a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_3b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_3b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
+        </div>
+
+        <div class="column is-3">
+          <img src="./static/images/sample_4.png" alt="Input #4" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_4a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_4a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_4b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_4b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="columns is-centered">
+        <div class="column is-3">
+          <img src="./static/images/sample_5.png" alt="Input #5" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_5a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_5a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_5b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_5b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
+        </div>
+
+        <div class="column is-3">
+          <img src="./static/images/sample_6.png" alt="Input #6" style="width: 100%;">
+          <p class="is-size-6 mt-2" style="margin-top: 2px !important;">
+            <span style="font-weight: bold;">Input image</span>
+          </p>
+        </div>
+        <div class="column is-3">
+          <div class="twentytwenty-container" data-orientation="horizontal" ratio="1.0">
+            <div class="video">
+              <video poster="" id="result_6a" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_6a.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="video">
+              <video poster="" id="result_6b" autoplay muted loop playsinline height="100%">
+                <source src="./static/videos/result_6b.mp4" type="video/mp4">
+              </video>
+            </div>
+          </div>
+          <p class="is-size-6 mt-2">
+            <span style="color: #5E81AC; font-weight: bold;">HORIA (Ours)</span>
+          </p>
         </div>
       </div>
     </div>
-    <!-- Task-specific results -->
+    <!-- Qualitative results-->
+
+    <script>
+      $(function(){
+          $(".twentytwenty-container").twentytwenty({
+              no_overlay: true,
+              default_offset_pct: 0.5,
+              click_to_move: false
+          });
+      });
+    </script>
 
     <!-- Comparison with SOTA methods -->
     <div class="column has-text-centered">
@@ -306,11 +418,8 @@
             <source src="./static/videos/comparison_5.mp4" type="video/mp4">
           </video>
         </div>
-        <div class="item item-gen6">
-          <video poster="" id="comp-6" autoplay muted loop playsinline height="100%">
-            <source src="./static/videos/comparison_6.mp4" type="video/mp4">
-          </video>
-        </div>
+      </div>
+      <div class="content has-text-justified" style="padding-top:15px;">
       </div>
     </div>
     <!-- Comparison with SOTA methods -->
@@ -318,27 +427,13 @@
   </div>
 </section>
 
-<!-- Youtube video -->
-<!-- <section class="section" style="padding-top: 3rem;">
-  <div class="container is-max-desktop">
-    <div class="hero-body has-text-centered" style="padding-top: 0px;">
-      <h2 class="title is-4">Youtube Video</h2>
-      <div class="publication-video" style="width: 80%; display: inline-block;">
-        <iframe src="https://www.youtube.com/embed/jNtbY6Z3urY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-    </div>
-  </div>
-</section> -->
-<!-- Youtube video -->
-
 <section class="section" id="BibTeX" style="padding-top:0px;">
   <div class="container is-max-desktop content">
     <h4 class="title">BibTeX</h4>
-    <pre><code>@misc{nam2026horia,
-      author = {Nam, Hyeongjin and Lee, Taeryung and Jung, Daniel Sungho and Lee, Kyoung Mu},
-      title  = {{HORIA}: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation},
-      year   = {2026},
-      note   = {Under review},
+    <pre><code>@misc{nam_horia,
+      author    = {Nam, Hyeongjin and Lee, Taeryung and Jung, Daniel Sungho and Lee, Kyoung Mu},
+      title     = {{HORIA}: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering},
+      url       = {https://hygenie1228.github.io/HORIA/static/HORIA.pdf},
     }</code></pre>
   </div>
 </section>
@@ -346,7 +441,7 @@
 <footer class="footer">
   <div class="container">
     <div class="content has-text-centered">
-      <a class="icon-link" href="./static/HORIA.pdf">
+      <a class="icon-link" href="./static/HORIA.pdf" target="_blank" rel="noopener" aria-label="HORIA paper (PDF)">
         <i class="fas fa-file-pdf"></i>
       </a>
       <a class="icon-link" href="https://github.com/hygenie1228" class="external-link">
