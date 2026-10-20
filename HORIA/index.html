@@ -3,22 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="HORIA: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation">
-  <meta name="keywords" content="HORIA, 4D human-object interaction, monocular video, novel-view video generation">
+        content="HORIA reconstructs the 4D human and object from a monocular video through interaction-aware re-rendering guided by temporally grounded descriptions of each interaction phase.">
+  <meta name="keywords" content="HORIA, 4D human and object reconstruction, monocular video, interaction-aware re-rendering, motion-aware captioning">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HORIA: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation</title>
+  <title>HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering</title>
 
   <!-- 🟡 Open Graph (OG) -->
-  <meta property="og:title" content="HORIA" />
-  <meta property="og:description" content="HORIA reconstructs 4D human-object interactions from a monocular video using temporally grounded novel-view video generation." />
+  <meta property="og:title" content="HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering" />
+  <meta property="og:description" content="HORIA reconstructs the 4D human and object from a monocular video through interaction-aware re-rendering guided by temporally grounded descriptions of each interaction phase." />
   <meta property="og:image" content="https://hygenie1228.github.io/HORIA/static/images/thumbnail.png" />
   <meta property="og:url" content="https://hygenie1228.github.io/HORIA/" />
   <meta property="og:type" content="website" />
 
   <!-- X site -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HORIA" />
-  <meta name="twitter:description" content="HORIA reconstructs 4D human-object interactions from a monocular video using temporally grounded novel-view video generation." />
+  <meta name="twitter:title" content="HORIA: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering" />
+  <meta name="twitter:description" content="HORIA reconstructs the 4D human and object from a monocular video through interaction-aware re-rendering guided by temporally grounded descriptions of each interaction phase." />
   <meta name="twitter:image" content="https://hygenie1228.github.io/HORIA/static/images/thumbnail.png" />
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
@@ -49,8 +49,8 @@
         <div class="column has-text-centered">
           <h1 class="title is-1 publication-title">
             <img src="./static/images/favicon.png" class="inline-title-icon" alt="HORIA Icon">
-            <span class="horia-gradient">HORIA</span>: 4D Human-Object Reconstruction<br>
-            via Temporally Grounded Novel-View Video Generation
+            <span class="horia-gradient">HORIA</span>: 4D Human and Object Reconstruction from<br>
+            a Monocular Video with Interaction-Aware Re-Rendering
           </h1>
           <div class="is-size-4 publication-authors">
             <span class="author-block">
@@ -126,7 +126,7 @@
       </div>
       <div class="columns is-centered has-text-centered teaser-wide-row">
         <h2 class="subtitle" style="width:100%; margin-top:0.5rem; margin-bottom:3rem; font-size: 1.1rem;">
-            <b>TL;DR.</b> Given a monocular video, <b>HORIA</b> reconstructs temporally coherent 4D human-object interactions by decomposing the video into grounded sub-actions and generating interaction-aware novel-view supervision.
+            <b>TL;DR.</b> Given a monocular video, <b>HORIA</b> reconstructs the 4D human and object with spatially and temporally consistent appearance, guided by text descriptions of each interaction phase.
         </h2>
       </div>
     </div>
@@ -141,15 +141,16 @@
         <div class="content has-text-justified">
           <p>
             Joint 4D reconstruction of a human and object from a monocular video is essential for understanding how people interact with their environment.
-            Despite recent progress, this task remains challenging for two main reasons.
-            First, an interaction video often contains multiple sub-actions, making it difficult for a single global description to identify the interaction state at each moment.
-            Second, severe human-object occlusion in a single-view video provides insufficient geometric evidence and often leads to inconsistent reconstructions.
+            While recent methods have made noticeable progress, capturing such human-object interactions remains difficult due to two main challenges.
+            First, a video typically contains composite semantic context spanning multiple interaction phases, making it difficult to track the temporal changes of the interaction in the reconstruction.
+            Second, under human-object occlusion, a single-view observation contains incomplete visual information about the interaction, resulting in geometrically inconsistent reconstructions.
           </p>
           <p>
-            To address these challenges, we introduce <b>HORIA</b>, a framework built upon two core designs.
-            First, motion-aware video captioning decomposes the input into temporally grounded, semantically distinct sub-actions and assigns a specific text description to each interaction phase.
-            Second, an interaction-aware re-rendering pipeline renders the initial 4D human and object from novel viewpoints and refines those renderings with a text-guided video diffusion prior.
-            The resulting novel-view videos provide auxiliary supervision that enables accurate, geometrically consistent, and temporally coherent 4D reconstruction across diverse interaction scenarios.
+            To address these challenges, we introduce <b>HORIA</b>, built upon two core designs.
+            First, we decompose the entire input video into temporally grounded and semantically distinct interaction phases with motion-aware captioning, obtaining a specific text description for each phase.
+            Second, conditioned on these text descriptions of the interaction, we propose an interaction-aware re-rendering that compensates for the limited single-view observation.
+            Specifically, we render the initially reconstructed 4D human and object from novel viewpoints and refine the renderings with a text-to-video diffusion prior, which provides auxiliary novel-view supervision beyond single-view cues.
+            As a result, our framework produces temporally coherent and accurate 4D reconstructions under diverse interaction scenarios, achieving state-of-the-art performance.
           </p>
         </div>
       </div>
@@ -196,9 +197,9 @@
           <img src="./static/images/pipeline.jpeg" alt="Algorithm description of HORIA" width="100%">
       </div>
       <div class="content has-text-justified">
-          Given a monocular interaction video, <b>HORIA</b> first estimates the human and object motion and decomposes the sequence into temporally grounded sub-actions with motion-aware captions.
-          For each sub-action, it renders the initial 4D reconstruction from novel viewpoints and refines the videos using semantic and contact-aware text guidance.
-          These refined multi-view observations supervise a joint optimization of the human and object, improving spatial accuracy and temporal consistency under severe occlusion.
+          <b>HORIA</b> consists of three stages. First, it uses the initial object motion, motion-aware captioning, and temporal grounding to decompose the input video into interaction phases, each paired with a specific text description.
+          Second, it renders the initial 3D Gaussian reconstruction from novel viewpoints and refines the rendered videos with a text-to-video diffusion prior and region-specific prompts.
+          Finally, the refined novel-view videos are aggregated into a signed distance field and used alongside reconstruction, contact, and collision objectives to optimize the final 4D human and object reconstruction.
       </div>
     </div>
     <!-- Introducing HORIA -->
@@ -235,7 +236,7 @@
           </div>
         </div>
         <div class="content has-text-justified" style="padding-top: 15px;">
-          HORIA tracks changes in the initial object motion to identify coarse interaction boundaries, then uses motion-aware captioning and temporal grounding to divide the video into semantically distinct sub-actions with precise time spans.
+          HORIA tracks changes in the initial object motion to identify coarse boundaries, then uses motion-aware captioning and temporal grounding to divide the video into semantically distinct interaction phases with precise boundaries.
         </div>
       </div>
 
@@ -336,7 +337,7 @@
     <h4 class="title">BibTeX</h4>
     <pre><code>@misc{nam2026horia,
       author = {Nam, Hyeongjin and Lee, Taeryung and Jung, Daniel Sungho and Lee, Kyoung Mu},
-      title  = {{HORIA}: 4D Human-Object Reconstruction via Temporally Grounded Novel-View Video Generation},
+      title  = {{HORIA}: 4D Human and Object Reconstruction from a Monocular Video with Interaction-Aware Re-Rendering},
       year   = {2026},
       note   = {Under review},
     }</code></pre>
